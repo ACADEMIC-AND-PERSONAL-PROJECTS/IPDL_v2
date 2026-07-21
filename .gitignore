@@ -1,0 +1,142 @@
+# ============================================
+# Java / Maven — Build Artifacts
+# ============================================
+target/
+*.class
+*.jar
+*.war
+*.ear
+dependency-reduced-pom.xml
+
+# ============================================
+# Maven Wrapper (keep these committed)
+# ============================================
+# !mvnw
+# !mvnw.cmd
+# !.mvn/
+
+# ============================================
+# IDE — IntelliJ IDEA
+# ============================================
+.idea/
+*.iml
+*.iws
+*.ipr
+out/
+
+# ============================================
+# IDE — VS Code
+# ============================================
+.vscode/
+*.code-workspace
+
+# ============================================
+# IDE — Eclipse / NetBeans
+# ============================================
+.project
+.classpath
+.settings/
+bin/
+nb-configuration.xml
+nbactions.xml
+
+# ============================================
+# OS Files
+# ============================================
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+
+# ============================================
+# Environment & Secrets
+# ============================================
+.env
+.env.local
+.env.*.local
+*.pem
+*.key
+*.cert
+secrets/
+
+# ============================================
+# Spring Boot — Application Properties
+# ============================================
+application-local.properties
+application-dev.properties
+application-prod.properties
+application-test.properties
+!application.properties.example
+!application.yml.example
+
+# ============================================
+# Logs
+# ============================================
+*.log
+logs/
+log/
+
+# ============================================
+# Docker
+# ============================================
+docker-data/
+postgres_data/
+pgadmin_data/
+
+# ============================================
+# Build Tools — Caches
+# ============================================
+.gradle/
+build/
+!gradle/wrapper/gradle-wrapper.jar
+.m2/
+.mvn/
+
+# ============================================
+# Testing Reports
+# ============================================
+test-reports/
+coverage/
+*.test
+*.results
+allure-results/
+allure-report/
+
+# ============================================
+# Node / Frontend (if added later)
+# ============================================
+node_modules/
+frontend/dist/
+frontend/build/
+frontend/.next/
+
+# ============================================
+# Temporary & Backup Files
+# ============================================
+*.swp
+*.swo
+*.tmp
+*.temp
+*~
+.#*
+\#*\#
+*.bak
+*.orig
+*.old
+
+# ============================================
+# System & Misc
+# ============================================
+*.pid
+*.seed
+*.pid.lock
+heapdump*.hprof
+hs_err_pid*
+*.hprof
+*.dump
+*.stacktrace
