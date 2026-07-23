@@ -29,7 +29,7 @@ public class EtablissementService {
     }
 
     // Recuperer un etablisement par son nom
-    private Etablissement getEtablissementByName(String name) {
+    public Etablissement getEtablissementByName(String name) {
         return etablissementRepository.findByNom(name).get();
     }
 
