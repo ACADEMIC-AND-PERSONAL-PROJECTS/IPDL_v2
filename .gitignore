@@ -6,6 +6,7 @@ target/
 *.jar
 *.war
 *.ear
+.mvn/
 dependency-reduced-pom.xml
 
 # ============================================
@@ -108,12 +109,14 @@ allure-results/
 allure-report/
 
 # ============================================
-# Node / Frontend (if added later)
+# Node / Frontend (React)
 # ============================================
 node_modules/
 frontend/dist/
 frontend/build/
 frontend/.next/
+frontend/.env
+frontend/.env.local
 
 # ============================================
 # Temporary & Backup Files
@@ -127,16 +130,3 @@ frontend/.next/
 \#*\#
 *.bak
 *.orig
-*.old
-
-# ============================================
-# System & Misc
-# ============================================
-*.pid
-*.seed
-*.pid.lock
-heapdump*.hprof
-hs_err_pid*
-*.hprof
-*.dump
-*.stacktrace
