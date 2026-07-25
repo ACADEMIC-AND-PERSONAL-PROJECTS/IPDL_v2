@@ -41,7 +41,7 @@ export const AuthProvider({ children }) {
 
     return (
         // Stockage des donnees au niveau du context
-        <AuthContext.Provider value={{token, user, login, register, logout}}>
+        <AuthContext.Provider value={{token, user, login, register, logout, getAuthHeader}}>
             {children}
         </AuthContext.Provider>
     );
