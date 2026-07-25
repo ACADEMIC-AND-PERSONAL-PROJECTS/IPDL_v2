@@ -31,7 +31,7 @@ public class User {
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    private RoleUser rolel;
+    private RoleUser role;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "etablissement_id", nullable = false)

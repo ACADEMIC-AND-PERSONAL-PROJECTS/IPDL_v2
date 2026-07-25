@@ -1,10 +1,11 @@
 import EtablissementList from "./components/EtablissementList"
+import LoginPage from "./pages/LoginPage"
 
 function App() {
 
   return (
     <>
-      <EtablissementList/>
+      <LoginPage/>
     </>
   )
 }
