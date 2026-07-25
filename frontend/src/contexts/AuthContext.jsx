@@ -6,7 +6,7 @@ import { login as loginService, register as registerService } from "../services/
 const AuthContext = createContext(null);
 
 // Fonction pour gerer toute la logique d'authentification & inscription cote front
-export const AuthProvider({ children }) {
+export const AuthProvider = ({ children }) => {
 
     // Variable pour stocker les donnees d'authentication/inscription
     const [token, setToken] = useState(null);
