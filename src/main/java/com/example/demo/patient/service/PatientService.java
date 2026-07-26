@@ -38,7 +38,7 @@ public class PatientService {
         patient.setNumeroDossier(genererNumeroDossier());
         patient.setEtablissement(etablissement);
 
-        return toResponseDto(patient);
+        return toResponseDto(patientRepository.save(patient));
     }
 
     // Lister toute les patients
