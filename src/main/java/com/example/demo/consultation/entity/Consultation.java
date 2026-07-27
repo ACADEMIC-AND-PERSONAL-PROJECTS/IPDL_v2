@@ -35,6 +35,7 @@ public class Consultation {
     @Column(name = "score_confiance")
     private Double scoreConfiance;
 
+    @Builder.Default
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private StatutConsultation statut = StatutConsultation.EN_ATTENTE;
