@@ -27,8 +27,7 @@ public class ConsultationResponse {
     private String patientPrenom;
     private String patientNumeroDossier;
 
-    private Long medecinId;
-    private String medecinNom;
-    private String medecinPrenom;
+    private String agentNom;
+    private String agentEmail;
 
 }

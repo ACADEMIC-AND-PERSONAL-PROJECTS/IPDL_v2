@@ -9,9 +9,9 @@ import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -26,22 +26,21 @@ public class ConsultationController {
     private final ConsultationService consultationService;
 
     @PostMapping
-    @Operation(summary = "Creer une nouvelle consultation")
-    @PreAuthorize("hasAnyRole('AGENT', 'MEDECIN', 'ADMIN')")
-    public ResponseEntity<ConsultationResponse> creerConsultation(@Valid @RequestBody ConsultationRequest request,
-                                                                   @AuthenticationPrincipal String email) {
-        return ResponseEntity.ok(consultationService.creerConsultation(request, email));
+    @Operation(summary = "Creer une nouvelle consultation pour un patient")
+    @PreAuthorize("hasAnyRole('AGENT', 'MEDECIN')")
+    public ResponseEntity<ConsultationResponse> creerConsultation(@Valid @RequestBody ConsultationRequest request) {
+        return ResponseEntity.status(HttpStatus.CREATED).body(consultationService.creerConsultation(request));
     }
 
     @GetMapping
     @Operation(summary = "Lister toutes les consultations")
-    @PreAuthorize("hasAnyRole('AGENT', 'MEDECIN', 'ADMIN')")
+    @PreAuthorize("hasAnyRole('MEDECIN', 'ADMIN')")
     public ResponseEntity<List<ConsultationResponse>> getAllConsultations() {
         return ResponseEntity.ok(consultationService.getAllConsultations());
     }
 
     @GetMapping("/{id}")
-    @Operation(summary = "Trouver une consultation par son ID")
+    @Operation(summary = "Detail d'une consutation")
     @PreAuthorize("hasAnyRole('AGENT', 'MEDECIN', 'ADMIN')")
     public ResponseEntity<ConsultationResponse> getConsultationById(@PathVariable(name = "id") Long id) {
         return ResponseEntity.ok(consultationService.getConsultationById(id));
@@ -50,15 +49,15 @@ public class ConsultationController {
     @GetMapping("/patient/{patientId}")
     @Operation(summary = "Lister les consultations d'un patient")
     @PreAuthorize("hasAnyRole('AGENT', 'MEDECIN', 'ADMIN')")
-    public ResponseEntity<List<ConsultationResponse>> getConsultationsByPatient(@PathVariable Long patientId) {
+    public ResponseEntity<List<ConsultationResponse>> getConsultationsByPatient(@PathVariable(name = "patientId") Long patientId) {
         return ResponseEntity.ok(consultationService.getConsultationsByPatient(patientId));
     }
 
-    @GetMapping("/medecin/{medecinId}")
+    @GetMapping("/mes-consultations")
     @Operation(summary = "Lister les consultations d'un medecin")
-    @PreAuthorize("hasAnyRole('AGENT', 'MEDECIN', 'ADMIN')")
-    public ResponseEntity<List<ConsultationResponse>> getConsultationsByMedecin(@PathVariable Long medecinId) {
-        return ResponseEntity.ok(consultationService.getConsultationsByMedecin(medecinId));
+    @PreAuthorize("hasAnyRole('AGENT', 'MEDECIN')")
+    public ResponseEntity<List<ConsultationResponse>> getConsultationsByAgent() {
+        return ResponseEntity.ok(consultationService.getConsultationsByAgent());
     }
 
     @GetMapping("/statut/{statut}")
@@ -68,20 +67,11 @@ public class ConsultationController {
         return ResponseEntity.ok(consultationService.getConsultationsByStatut(statut));
     }
 
-    @PutMapping("/{id}")
-    @Operation(summary = "Mettre a jour les informations d'une consultation")
-    @PreAuthorize("hasAnyRole('AGENT', 'MEDECIN', 'ADMIN')")
-    public ResponseEntity<ConsultationResponse> updateConsultation(@PathVariable(name = "id") Long id,
-                                                                    @Valid @RequestBody ConsultationRequest request) {
-        return ResponseEntity.ok(consultationService.updateConsultation(id, request));
-    }
-
-    @PatchMapping("/{id}/statut")
-    @Operation(summary = "Changer le statut d'une consultation")
-    @PreAuthorize("hasAnyRole('AGENT', 'MEDECIN', 'ADMIN')")
-    public ResponseEntity<ConsultationResponse> updateStatut(@PathVariable(name = "id") Long id,
-                                                              @RequestParam StatutConsultation statut) {
-        return ResponseEntity.ok(consultationService.updateStatut(id, statut));
+    @PatchMapping("/{id}/cloturer")
+    @Operation(summary = "Cloturer une consultation")
+    @PreAuthorize("hasAnyRole('MEDECIN', 'ADMIN')")
+    public ResponseEntity<ConsultationResponse> closeConsultation(@PathVariable(name = "id") Long id, @Valid @RequestParam(required = false) String notes) {
+        return ResponseEntity.ok(consultationService.closeConsultation(id, notes));
     }
 
     @DeleteMapping("/{id}")
