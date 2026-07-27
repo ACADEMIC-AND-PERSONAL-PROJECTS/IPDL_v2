@@ -1,8 +1,12 @@
 package com.example.demo.consultation.entity;
+
+import com.example.demo.auth.entity.User;
+import com.example.demo.patient.entity.Patient;
 import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import lombok.AllArgsConstructor;
+
 import java.time.LocalDateTime;
 
 @Entity
@@ -34,6 +38,14 @@ public class Consultation {
 
     @Column(columnDefinition = "TEXT")
     private String notes;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "patient_id", nullable = false)
+    private Patient patient;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "medecin_id", nullable = false)
+    private User medecin;
 
     public enum StatutConsultation {
         EN_ATTENTE, ANALYSEE, CLOTUREE
