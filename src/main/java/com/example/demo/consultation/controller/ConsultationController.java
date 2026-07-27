@@ -67,7 +67,7 @@ public class ConsultationController {
         return ResponseEntity.ok(consultationService.getConsultationsByStatut(statut));
     }
 
-    @PutMapping("/{id}/cloturer")
+    @PatchMapping("/{id}/cloturer")
     @Operation(summary = "Cloturer une consultation")
     @PreAuthorize("hasAnyRole('MEDECIN', 'ADMIN')")
     public ResponseEntity<ConsultationResponse> closeConsultation(@PathVariable(name = "id") Long id, @Valid @RequestParam(required = false) String notes) {
