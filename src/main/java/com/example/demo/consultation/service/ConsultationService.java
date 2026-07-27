@@ -99,7 +99,7 @@ public class ConsultationService {
     }
 
     // Cloturer une consultation
-    public ConsultationResponse updateStatut(Long id, String notes) {
+    public ConsultationResponse closeConsultation(Long id, String notes) {
         Consultation consultation = consultationRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Consultation introuvable : " + id));
         consultation.setStatut(StatutConsultation.CLOTUREE);
