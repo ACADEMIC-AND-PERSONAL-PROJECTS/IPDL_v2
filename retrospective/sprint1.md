@@ -142,5 +142,3 @@ La navigation est manuelle via `useState("page")` dans `App.jsx` — sans `react
 - **Lab Dashboard (US-06) :** Le Commandant pilote les indicateurs et statistiques
 
 ---
-
-*Document généré en séance de rétrospective, facilitée par Le Stratège. Chaque membre s'est exprimé sur les trois axes. Les actions sont priorisées et assignées. Commit à suivre.*
