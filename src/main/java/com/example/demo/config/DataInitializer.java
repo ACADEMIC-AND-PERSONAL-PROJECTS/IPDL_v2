@@ -3,6 +3,9 @@ package com.example.demo.config;
 import com.example.demo.auth.entity.User;
 import com.example.demo.auth.entity.User.RoleUser;
 import com.example.demo.auth.repository.UserRepository;
+import com.example.demo.consultation.entity.Consultation;
+import com.example.demo.consultation.entity.Consultation.StatutConsultation;
+import com.example.demo.consultation.repository.ConsultationRepository;
 import com.example.demo.patient.entity.Etablissement;
 import com.example.demo.patient.entity.Patient;
 import com.example.demo.patient.entity.Patient.Sexe;
@@ -15,6 +18,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 
@@ -26,6 +30,7 @@ public class DataInitializer implements CommandLineRunner {
     private final EtablissementRepository etablissementRepository;
     private final UserRepository userRepository;
     private final PatientRepository patientRepository;
+    private final ConsultationRepository consultationRepository;
     private final PasswordEncoder passwordEncoder;
 
     private static final String TEST_PASSWORD = "test123";
@@ -64,21 +69,27 @@ public class DataInitializer implements CommandLineRunner {
 
             log.info("3 établissements créés.");
 
-            creerUtilisateurs(hopitalDakar, "dakar");
-            creerUtilisateurs(centreThies, "thies");
-            creerUtilisateurs(posteTambacounda, "tamba");
+            List<User> usersDakar = creerUtilisateurs(hopitalDakar, "dakar");
+            List<User> usersThies = creerUtilisateurs(centreThies, "thies");
+            List<User> usersTamba = creerUtilisateurs(posteTambacounda, "tamba");
 
             log.info("9 utilisateurs de test créés (3 par établissement).");
 
-            creerPatients(hopitalDakar, "Dakar");
-            creerPatients(centreThies, "Thiès");
-            creerPatients(posteTambacounda, "Tambacounda");
+            List<Patient> patientsDakar = creerPatients(hopitalDakar, "Dakar");
+            List<Patient> patientsThies = creerPatients(centreThies, "Thiès");
+            List<Patient> patientsTamba = creerPatients(posteTambacounda, "Tambacounda");
 
             log.info("6 patients de test créés (2 par établissement).");
+
+            creerConsultations(patientsDakar, usersDakar);
+            creerConsultations(patientsThies, usersThies);
+            creerConsultations(patientsTamba, usersTamba);
+
+            log.info("Consultations de test créées.");
         }
     }
 
-    private void creerUtilisateurs(Etablissement etablissement, String suffixe) {
+    private List<User> creerUtilisateurs(Etablissement etablissement, String suffixe) {
         String motDePasse = passwordEncoder.encode(TEST_PASSWORD);
 
         List<User> utilisateurs = List.of(
@@ -95,10 +106,10 @@ public class DataInitializer implements CommandLineRunner {
                         motDePasse, RoleUser.ADMIN, etablissement)
         );
 
-        userRepository.saveAll(utilisateurs);
+        return userRepository.saveAll(utilisateurs);
     }
 
-    private void creerPatients(Etablissement etablissement, String region) {
+    private List<Patient> creerPatients(Etablissement etablissement, String region) {
         List<Patient> patients = List.of(
                 new Patient(null,
                         "Diop", "Mamadou",
@@ -121,7 +132,65 @@ public class DataInitializer implements CommandLineRunner {
                         etablissement)
         );
 
-        patientRepository.saveAll(patients);
+        return patientRepository.saveAll(patients);
+    }
+
+    private void creerConsultations(List<Patient> patients, List<User> users) {
+        User agent = users.stream()
+                .filter(u -> u.getRole() == RoleUser.AGENT)
+                .findFirst().orElseThrow();
+        User medecin = users.stream()
+                .filter(u -> u.getRole() == RoleUser.MEDECIN)
+                .findFirst().orElseThrow();
+
+        Patient premierPatient = patients.get(0);
+        Patient deuxiemePatient = patients.get(1);
+
+        List<Consultation> consultations = List.of(
+                Consultation.builder()
+                        .date(LocalDateTime.now().minusDays(5))
+                        .symptomes("Fièvre 39 °C depuis 3 jours. Céphalées intenses. Courbatures généralisées.")
+                        .diagnosticIa("Paludisme simple - Plasmodium falciparum")
+                        .scoreConfiance(0.94)
+                        .statut(StatutConsultation.CLOTUREE)
+                        .notes("Patient vu en urgence. TDR positif. Traitement ACT prescrit. RDV de contrôle dans 1 semaine.")
+                        .patient(premierPatient)
+                        .user(medecin)
+                        .build(),
+
+                Consultation.builder()
+                        .date(LocalDateTime.now().minusDays(2))
+                        .symptomes("Douleurs abdominales diffuses. Brûlures mictionnelles. Pollakiurie.")
+                        .diagnosticIa("Infection urinaire basse - Cystite aiguë")
+                        .scoreConfiance(0.87)
+                        .statut(StatutConsultation.ANALYSEE)
+                        .patient(deuxiemePatient)
+                        .user(medecin)
+                        .build(),
+
+                Consultation.builder()
+                        .date(LocalDateTime.now().minusHours(6))
+                        .symptomes("Toux productive depuis 1 semaine. Douleur thoracique légère. Expectorations verdâtres.")
+                        .notes("Auscultation : râles bronchiques bilatéraux. Patient tabagique. À orienter vers radiographie.")
+                        .statut(StatutConsultation.EN_ATTENTE)
+                        .patient(premierPatient)
+                        .user(agent)
+                        .build(),
+
+                Consultation.builder()
+                        .date(LocalDateTime.now().minusDays(10))
+                        .symptomes("Céphalées chroniques. Vertiges occasionnels. Acouphènes.")
+                        .diagnosticIa("Hypertension artérielle essentielle stade 1")
+                        .scoreConfiance(0.91)
+                        .statut(StatutConsultation.CLOTUREE)
+                        .notes("TA 148/92 mmHg. Conseils hygiéno-diététiques. Suivi tensionnel à domicile. Contrôle dans 3 mois.")
+                        .patient(deuxiemePatient)
+                        .user(medecin)
+                        .build()
+        );
+
+        consultationRepository.saveAll(consultations);
+        log.info("{} : {} consultations créées.", agent.getEtablissement().getNom(), consultations.size());
     }
 
     private String genererNumeroDossier() {
