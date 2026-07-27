@@ -13,9 +13,54 @@ permissions:
 
 # JOBS : Les taches a executer
 jobs:
+  test-backend:
+    name: Tests du backend
+    runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:15-alpine
+        env:
+          POSTGRES_DB: demo_test
+          POSTGRES_USER: demo_user
+          POSTGRES_PASSWORD: demo_pass
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    steps:
+        - name: Checkout du code
+          uses: actions/checkout@v4
+
+        - name: Installation de Java 21
+          uses: actions/setup-java@v4
+          with:
+            java-version: '21'
+            distribution: 'temurin'
+            cache: 'maven'
+
+        - name: Exécution des tests
+          run: |
+            echo "Tests Spring Boot SenSante Pro"
+            mvn test --no-transfer-progress
+            echo "Tests réussis"
+
+        - name: Rapport de tests
+          if: always()
+          uses: dorny/test-reporter@v1
+          with:
+            name: Rapports de tests
+            path: target/surefire-reports/*.xml
+            reporter: java-junit
+
   build-backend:
     name: Construction du backend
     runs-on: ubuntu-latest
+    needs: test-backend
 
     services:
       postgres:
@@ -36,7 +81,7 @@ jobs:
         # Clonage du depot sur le runner
         - name: Checkout du code
           uses: actions/checkout@v4
-        
+
         # Installation de Java
         - name: Installation de Java 21
           uses: actions/setup-java@v4
@@ -45,11 +90,11 @@ jobs:
             distribution: 'temurin'
             cache: 'maven'
 
-        # Tests Spring Security + Compilation avec maven
+        # Compilation et packaging (tests deja valides par test-backend)
         - name: Build Spring Boot
           run: |
             echo "Complilation Spring Boot SenSante Pro"
-            mvn clean package --no-transfer-progress
+            mvn clean package -DskipTests --no-transfer-progress
             echo "Build réussi"
 
         # Sauvegarder le JAR
@@ -62,7 +107,7 @@ jobs:
   verify-pipeline:
     name: Verification du pipeline
     runs-on: ubuntu-latest
-    needs: build-backend
+    needs: [build-backend, test-backend]
 
     # STEPS : Etapes du job, executees dans l'ordre
     steps:
@@ -71,4 +116,4 @@ jobs:
             echo 'Pipeline SenSante Pro - Sprint 0'
             echo "Branche : ${{ github.ref_name }}"
             echo "Auteur : ${{ github.actor }}"
-            echo "Evénement : ${{ github.event_name }}"        
+            echo "Evénement : ${{ github.event_name }}"
