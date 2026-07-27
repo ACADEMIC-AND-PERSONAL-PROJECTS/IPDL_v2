@@ -60,7 +60,7 @@ public class PatientController {
 
     @DeleteMapping("/{id}")
     @Operation(summary = "Supprimer un patient")
-    @PreAuthorize("hasAnyRole('AGENT', 'MEDECIN', 'ADMIN')")
+    @PreAuthorize("hasAnyRole('ADMIN')")
     public ResponseEntity<Void> detelePatient(@PathVariable(name = "id") Long id) {
         patientService.deletePatient(id);
         return ResponseEntity.noContent().build();
