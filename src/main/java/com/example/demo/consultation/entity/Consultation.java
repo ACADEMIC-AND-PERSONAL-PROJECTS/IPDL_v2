@@ -2,8 +2,10 @@ package com.example.demo.consultation.entity;
 
 import com.example.demo.auth.entity.User;
 import com.example.demo.patient.entity.Patient;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -14,6 +16,7 @@ import java.time.LocalDateTime;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
+@Builder
 public class Consultation {
 
     @Id
@@ -32,6 +35,7 @@ public class Consultation {
     @Column(name = "score_confiance")
     private Double scoreConfiance;
 
+    @Builder.Default
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private StatutConsultation statut = StatutConsultation.EN_ATTENTE;
@@ -41,11 +45,13 @@ public class Consultation {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "patient_id", nullable = false)
+    @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
     private Patient patient;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "medecin_id", nullable = false)
-    private User medecin;
+    @JoinColumn(name = "user_id", nullable = false)
+    @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
+    private User user;
 
     public enum StatutConsultation {
         EN_ATTENTE, ANALYSEE, CLOTUREE
