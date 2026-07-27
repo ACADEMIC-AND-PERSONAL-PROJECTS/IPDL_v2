@@ -37,7 +37,6 @@ public class JwtAuthFilter extends OncePerRequestFilter {
 
         // Verification du token
         if (jwtService.isTokenValide(token)) {
-            filterChain.doFilter(request, response);
 
             // Extraction des informations
             String email = jwtService.extractEmail(token);
