@@ -8,12 +8,16 @@ import java.util.List;
 
 public interface ConsultationRepository extends JpaRepository<Consultation, Long> {
 
-    List<Consultation> findByPatientId(Long patientId);
+    // Toutes les consultations d'un patient triees par date croissante
+    List<Consultation> findByPatientIdOrderByDateDesc(Long patientId);
 
-    List<Consultation> findByMedecinId(Long medecinId);
+    // Toutes les consultations saisies par un agent
+    List<Consultation> findByUserEmailOrderByDateDesc(String email);
 
+    // Consultations en attentes
     List<Consultation> findByStatut(StatutConsultation statut);
 
-    List<Consultation> findByPatientIdAndStatut(Long patientId, StatutConsultation statut);
+    // Nombre de consultations par patient
+    long countByPatientId(Long patientId);
 
 }

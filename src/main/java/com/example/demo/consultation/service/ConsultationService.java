@@ -10,11 +10,13 @@ import com.example.demo.consultation.repository.ConsultationRepository;
 import com.example.demo.patient.entity.Patient;
 import com.example.demo.patient.repository.PatientRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Objects;
 
 @Service
 @RequiredArgsConstructor
@@ -25,24 +27,33 @@ public class ConsultationService {
     private final PatientRepository patientRepository;
     private final UserRepository userRepository;
 
-    public ConsultationResponse creerConsultation(ConsultationRequest request, String emailMedecin) {
+    public ConsultationResponse creerConsultation(ConsultationRequest request) {
+        // Trouver le patient
         Patient patient = patientRepository.findById(request.getPatientId())
                 .orElseThrow(() -> new RuntimeException("Patient introuvable : " + request.getPatientId()));
 
-        User medecin = userRepository.findByEmail(emailMedecin)
-                .orElseThrow(() -> new RuntimeException("Medecin introuvable : " + emailMedecin));
+        // Trouver l'utilisateur courant depuis le token JWT
+        String emailCourant = SecurityContextHolder.getContext().getAuthentication().getName();
 
-        Consultation consultation = new Consultation();
-        consultation.setDate(LocalDateTime.now());
-        consultation.setSymptomes(request.getSymptomes());
-        consultation.setNotes(request.getNotes());
-        consultation.setStatut(StatutConsultation.EN_ATTENTE);
-        consultation.setPatient(patient);
-        consultation.setMedecin(medecin);
+        // Trouver l'utilisateur courant sur la base de donnees
+        User user = userRepository.findByEmail(emailCourant).orElseThrow(
+                () -> new RuntimeException("Utilisateur introuvable : " + emailCourant)
+        );
+
+        // Creation de la consultation
+        Consultation consultation = Consultation.builder()
+                .date(LocalDateTime.now())
+                .symptomes(request.getSymptomes())
+                .notes(request.getNotes())
+                .statut(StatutConsultation.EN_ATTENTE)
+                .patient(patient)
+                .user(user)
+                .build();
 
         return toResponseDto(consultationRepository.save(consultation));
     }
 
+    // Lister toutes les consultations
     @Transactional(readOnly = true)
     public List<ConsultationResponse> getAllConsultations() {
         return consultationRepository.findAll()
@@ -51,6 +62,7 @@ public class ConsultationService {
                 .toList();
     }
 
+    // Trouver une consultation par ID
     @Transactional(readOnly = true)
     public ConsultationResponse getConsultationById(Long id) {
         return consultationRepository.findById(id)
@@ -58,22 +70,26 @@ public class ConsultationService {
                 .orElseThrow(() -> new RuntimeException("Consultation introuvable : " + id));
     }
 
+    // Trouver les consultation par ID de patient
     @Transactional(readOnly = true)
     public List<ConsultationResponse> getConsultationsByPatient(Long patientId) {
-        return consultationRepository.findByPatientId(patientId)
+        return consultationRepository.findByPatientIdOrderByDateDesc(patientId)
                 .stream()
                 .map(this::toResponseDto)
                 .toList();
     }
 
+    // Lister les consultations de l'agent courant
     @Transactional(readOnly = true)
-    public List<ConsultationResponse> getConsultationsByMedecin(Long medecinId) {
-        return consultationRepository.findByMedecinId(medecinId)
+    public List<ConsultationResponse> getConsultationsByAgent() {
+        String email = Objects.requireNonNull(SecurityContextHolder.getContext().getAuthentication()).getName();
+        return consultationRepository.findByUserEmailOrderByDateDesc(email)
                 .stream()
                 .map(this::toResponseDto)
                 .toList();
     }
 
+    // Trouver une consultation par son statut
     @Transactional(readOnly = true)
     public List<ConsultationResponse> getConsultationsByStatut(StatutConsultation statut) {
         return consultationRepository.findByStatut(statut)
@@ -82,23 +98,16 @@ public class ConsultationService {
                 .toList();
     }
 
-    public ConsultationResponse updateStatut(Long id, StatutConsultation nouveauStatut) {
+    // Cloturer une consultation
+    public ConsultationResponse updateStatut(Long id, String notes) {
         Consultation consultation = consultationRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Consultation introuvable : " + id));
-        consultation.setStatut(nouveauStatut);
+        consultation.setStatut(StatutConsultation.CLOTUREE);
+        if (notes != null) consultation.setNotes(notes);
         return toResponseDto(consultation);
     }
 
-    public ConsultationResponse updateConsultation(Long id, ConsultationRequest request) {
-        Consultation consultation = consultationRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Consultation introuvable : " + id));
-
-        consultation.setSymptomes(request.getSymptomes());
-        consultation.setNotes(request.getNotes());
-
-        return toResponseDto(consultation);
-    }
-
+    // Supprimer une consultation
     public void deleteConsultation(Long id) {
         if (!consultationRepository.existsById(id)) {
             throw new RuntimeException("Consultation introuvable : " + id);
@@ -119,9 +128,8 @@ public class ConsultationService {
                 .patientNom(c.getPatient().getNom())
                 .patientPrenom(c.getPatient().getPrenom())
                 .patientNumeroDossier(c.getPatient().getNumeroDossier())
-                .medecinId(c.getMedecin().getId())
-                .medecinNom(c.getMedecin().getNom())
-                .medecinPrenom(c.getMedecin().getPrenom())
+                .agentNom(c.getUser().getPrenom() + " " + c.getUser().getNom())
+                .agentEmail(c.getUser().getEmail())
                 .build();
     }
 
