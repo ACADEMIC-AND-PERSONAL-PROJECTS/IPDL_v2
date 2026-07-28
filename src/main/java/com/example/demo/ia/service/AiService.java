@@ -9,7 +9,7 @@ import org.springframework.stereotype.Service;
 @Service
 @RequiredArgsConstructor
 @Slf4j
-public class DiagnosticAiService {
+public class AiService {
 
     private final ChatClient chatClient;
 
