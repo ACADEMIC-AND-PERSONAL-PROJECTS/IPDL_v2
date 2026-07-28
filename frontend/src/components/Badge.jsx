@@ -1,15 +1,15 @@
-function Badge({ label, color = "blue" }) {
-  const colors = {
-    blue: "bg-blue-100 text-blue-700",
-    green: "bg-green-100 text-green-700",
-    red: "bg-red-100 text-red-700",
-    yellow: "bg-yellow-100 text-yellow-700",
-    gray: "bg-gray-100 text-gray-700",
-  };
+const STATUT_STYLES = {
+  EN_ATTENTE: { label: "En attente", bg: "bg-yellow-100", text: "text-yellow-700" },
+  ANALYSEE: { label: "Analysée", bg: "bg-green-100", text: "text-green-700" },
+  CLOTUREE: { label: "Clôturée", bg: "bg-gray-100", text: "text-gray-700" },
+};
+
+function Badge({ statut }) {
+  const style = STATUT_STYLES[statut] || { label: statut, bg: "bg-gray-100", text: "text-gray-700" };
 
   return (
-    <span className={`text-xs font-mono px-2 py-1 rounded ${colors[color] || colors.blue}`}>
-      {label}
+    <span className={`text-xs font-medium px-2 py-1 rounded ${style.bg} ${style.text}`}>
+      {style.label}
     </span>
   );
 }
