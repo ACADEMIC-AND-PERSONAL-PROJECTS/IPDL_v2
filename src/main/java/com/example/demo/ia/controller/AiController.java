@@ -24,7 +24,7 @@ public class AiController {
 
     @PostMapping("/analyser")
     @Operation(summary = "Analyser des symptomes directement")
-    @PreAuthorize("hasAnyRole('AGENT', 'MEEDECIN')")
+    @PreAuthorize("hasAnyRole('AGENT', 'MEDECIN')")
     public ResponseEntity<DiagnosticAiResult> analyser(@RequestParam String symptome, @RequestParam(required = false) String contexte) {
         return ResponseEntity.ok(aiService.analyserSymptomes(symptome, contexte));
     }
