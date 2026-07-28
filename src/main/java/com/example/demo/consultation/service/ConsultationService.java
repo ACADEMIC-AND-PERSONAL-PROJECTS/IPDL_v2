@@ -68,12 +68,12 @@ public class ConsultationService {
         // Mettre à jour la consultation (champs diagnostic)
         consultation.setDiagnosticIa(
                 diagnosticAiResult.diagnostic() + "\n\n"
-                + "Recommandations : " + diagnosticAiResult.recommendations() + "\n\n"
+                + "Recommandations : " + diagnosticAiResult.recommandations() + "\n\n"
                 + diagnosticAiResult.disclaimer()
         );
 
         // Mettre à jour la consultation (champs score confiance)
-        consultation.setScoreConfiance(diagnosticAiResult.scroreConfiance());
+        consultation.setScoreConfiance(diagnosticAiResult.scoreConfiance());
 
         // Mettre à jour le statut de la consultation
         consultation.setStatut(StatutConsultation.ANALYSEE);
