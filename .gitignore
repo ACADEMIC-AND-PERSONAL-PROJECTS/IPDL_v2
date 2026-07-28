@@ -130,3 +130,6 @@ frontend/.env.local
 \#*\#
 *.bak
 *.orig
+
+# application.properties for local dev
+src/main/resources/application.properties
