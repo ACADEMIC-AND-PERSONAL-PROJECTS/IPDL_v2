@@ -8,7 +8,7 @@ function LoginPage() {
   const handleSubmit = (e) => {
     e.preventDefault();
     // Appel API dans le Lab React 2
-    console.log("Login :", email, password);
+    console.log("Login submitted");
     setErreur("Connexion à l'API dans le prochain lab.");
   };
 
