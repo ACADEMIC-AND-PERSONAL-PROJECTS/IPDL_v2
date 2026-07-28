@@ -41,8 +41,22 @@ public interface ConsultationRepository extends JpaRepository<Consultation, Long
             "ORDER BY COUNT(c) DESC")
     List<Object[]> countConsultationsByRegion();
 
-    // Consultation par statuy
+    // Consultation par statut
     @Query("SELECT c.statut, COUNT(c) FROM Consultation c GROUP BY c.statut ORDER BY COUNT(c) DESC")
     List<Object[]> countConsultationsByStatut();
+
+    // Consultations pour les 6 derniers mois
+    @Query("SELECT MONTH(c.date), YEAR(c.date), COUNT(c.date) " +
+            "FROM Consultation c " +
+            "WHERE c.date >= :debut " +
+            "GROUP BY YEAR(c.date), MONTH(c.date) " +
+            "ORDER BY YEAR(c.date), MONTH(c.date)")
+    List<Object[]> countConsultationByDateMonth6();
+
+    // Taux d'analyse IA
+    @Query("SELECT COUNT(c) " +
+            "FROM Consultation c " +
+            "WHERE c.diagnosticIa IS NOT NULL ")
+    long countAiAnalyses();
 
 }
