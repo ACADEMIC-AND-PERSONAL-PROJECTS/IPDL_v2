@@ -1,25 +1,34 @@
-function NavBar({ user, onNavigate, onLogout }) {
+import { Link, useLocation } from "react-router-dom";
+
+function NavBar() {
+  const location = useLocation();
+
+  const liens = [
+    { path: "/patients", label: "Patients" },
+    { path: "/consultations", label: "Consultations" },
+    { path: "/dashboard", label: "Dashboard" },
+  ];
+
   return (
-    <nav className="bg-blue-800 text-white px-6 py-3 flex justify-between items-center">
-      <h1 className="text-lg font-bold">SénSanté Pro</h1>
-      <div className="flex gap-4 items-center">
-        <button onClick={() => onNavigate("dashboard")} className="hover:underline">
-          Tableau de bord
-        </button>
-        <button onClick={() => onNavigate("patients")} className="hover:underline">
-          Patients
-        </button>
-        <button onClick={() => onNavigate("consultations")} className="hover:underline">
-          Consultations
-        </button>
-        {user && (
-          <span className="text-sm text-blue-200">
-            {user.email} ({user.role})
-          </span>
-        )}
+    <nav className="bg-blue-800 text-white px-6 py-3 flex items-center justify-between shadow">
+      <span className="font-bold text-lg tracking-wide">SénSanté Pro</span>
+      <div className="flex gap-6">
+        {liens.map((lien) => (
+          <Link
+            key={lien.path}
+            to={lien.path}
+            className={`text-sm font-medium hover:text-blue-200 transition-colors
+              ${location.pathname === lien.path
+                ? "text-white underline underline-offset-4"
+                : "text-blue-200"
+              }`}
+          >
+            {lien.label}
+          </Link>
+        ))}
         <button
-          onClick={onLogout}
-          className="bg-red-600 hover:bg-red-700 px-3 py-1 rounded text-sm"
+          onClick={() => {/* déconnexion Lab React 2 */}}
+          className="text-sm text-red-300 hover:text-red-100"
         >
           Déconnexion
         </button>
