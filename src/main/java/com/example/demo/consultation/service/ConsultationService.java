@@ -7,6 +7,8 @@ import com.example.demo.consultation.dto.ConsultationResponse;
 import com.example.demo.consultation.entity.Consultation;
 import com.example.demo.consultation.entity.Consultation.StatutConsultation;
 import com.example.demo.consultation.repository.ConsultationRepository;
+import com.example.demo.ia.ai_exchange.DiagnosticAiResult;
+import com.example.demo.ia.service.DiagnosticAiService;
 import com.example.demo.patient.entity.Patient;
 import com.example.demo.patient.repository.PatientRepository;
 import lombok.RequiredArgsConstructor;
@@ -26,6 +28,7 @@ public class ConsultationService {
     private final ConsultationRepository consultationRepository;
     private final PatientRepository patientRepository;
     private final UserRepository userRepository;
+    private final DiagnosticAiService diagnosticAiService;
 
     public ConsultationResponse creerConsultation(ConsultationRequest request) {
         // Trouver le patient
@@ -50,6 +53,32 @@ public class ConsultationService {
                 .user(user)
                 .build();
 
+        consultation = consultationRepository.save(consultation);
+
+        // Analyser les symptomes
+        String contextPatient = String.format(
+                "Patient Info - Prenom: %s Nom: %s, Sexe: %s, Region: %s",
+                patient.getPrenom(), patient.getNom(),
+                patient.getSexe() != null ? patient.getSexe().name() : "Sexe non précisé", patient.getRegion()
+        );
+
+        // Recuperer la reponse de l'IA
+        DiagnosticAiResult diagnosticAiResult = diagnosticAiService.analyserSymptomes(request.getSymptomes(), contextPatient);
+
+        // Mettre à jour la consultation (champs diagnostic)
+        consultation.setDiagnosticIa(
+                diagnosticAiResult.diagnostic() + "\n\n"
+                + "Recommandations : " + diagnosticAiResult.recommendations() + "\n\n"
+                + diagnosticAiResult.disclaimer()
+        );
+
+        // Mettre à jour la consultation (champs score confiance)
+        consultation.setScoreConfiance(diagnosticAiResult.scroreConfiance());
+
+        // Mettre à jour le statut de la consultation
+        consultation.setStatut(StatutConsultation.ANALYSEE);
+
+        // Retourner la consultation
         return toResponseDto(consultationRepository.save(consultation));
     }
 
@@ -70,7 +99,7 @@ public class ConsultationService {
                 .orElseThrow(() -> new RuntimeException("Consultation introuvable : " + id));
     }
 
-    // Trouver les consultation par ID de patient
+    // Trouver les consultations par ID de patient
     @Transactional(readOnly = true)
     public List<ConsultationResponse> getConsultationsByPatient(Long patientId) {
         return consultationRepository.findByPatientIdOrderByDateDesc(patientId)
