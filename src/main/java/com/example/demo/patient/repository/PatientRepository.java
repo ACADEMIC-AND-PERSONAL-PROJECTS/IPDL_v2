@@ -2,6 +2,7 @@ package com.example.demo.patient.repository;
 
 import com.example.demo.patient.entity.Patient;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -21,5 +22,17 @@ public interface PatientRepository extends JpaRepository<Patient, Long> {
 
     // Trouver les patients par etablissement
     List <Patient> findByEtablissementId (Long etablissementId);
+
+    // Compter les patients par regions
+    @Query("SELECT p.region, COUNT(p) FROM Patient p GROUP BY p.region ORDER BY COUNT(p) DESC")
+    List<Object[]> countByRegion();
+
+    // Compter les patients par etablissement
+    @Query("SELECT p.etablissement.nom, COUNT(p) FROM Patient p GROUP BY p.etablissement.nom ORDER BY COUNT(p) DESC")
+    List<Object[]> countByEtablissement();
+
+    // Patients sans consultations
+    @Query("SELECT COUNT(p) FROM Patient p WHERE p.id NOT IN (SELECT c.patient.id FROM Consultation c)")
+    Long countPatientByNoConsultations();
 
 }
