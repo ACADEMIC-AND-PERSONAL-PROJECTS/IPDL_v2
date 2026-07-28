@@ -8,7 +8,7 @@ import com.example.demo.consultation.entity.Consultation;
 import com.example.demo.consultation.entity.Consultation.StatutConsultation;
 import com.example.demo.consultation.repository.ConsultationRepository;
 import com.example.demo.ia.ai_exchange.DiagnosticAiResult;
-import com.example.demo.ia.service.DiagnosticAiService;
+import com.example.demo.ia.service.AiService;
 import com.example.demo.patient.entity.Patient;
 import com.example.demo.patient.repository.PatientRepository;
 import lombok.RequiredArgsConstructor;
@@ -28,7 +28,7 @@ public class ConsultationService {
     private final ConsultationRepository consultationRepository;
     private final PatientRepository patientRepository;
     private final UserRepository userRepository;
-    private final DiagnosticAiService diagnosticAiService;
+    private final AiService aiService;
 
     public ConsultationResponse creerConsultation(ConsultationRequest request) {
         // Trouver le patient
@@ -63,17 +63,17 @@ public class ConsultationService {
         );
 
         // Recuperer la reponse de l'IA
-        DiagnosticAiResult diagnosticAiResult = diagnosticAiService.analyserSymptomes(request.getSymptomes(), contextPatient);
+        DiagnosticAiResult diagnosticAiResult = aiService.analyserSymptomes(request.getSymptomes(), contextPatient);
 
         // Mettre à jour la consultation (champs diagnostic)
         consultation.setDiagnosticIa(
                 diagnosticAiResult.diagnostic() + "\n\n"
-                + "Recommandations : " + diagnosticAiResult.recommendations() + "\n\n"
+                + "Recommandations : " + diagnosticAiResult.recommandations() + "\n\n"
                 + diagnosticAiResult.disclaimer()
         );
 
         // Mettre à jour la consultation (champs score confiance)
-        consultation.setScoreConfiance(diagnosticAiResult.scroreConfiance());
+        consultation.setScoreConfiance(diagnosticAiResult.scoreConfiance());
 
         // Mettre à jour le statut de la consultation
         consultation.setStatut(StatutConsultation.ANALYSEE);
