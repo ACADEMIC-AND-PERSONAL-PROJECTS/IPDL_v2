@@ -1,26 +1,20 @@
 import { useState, useEffect } from "react";
 import NavBar from "../components/NavBar";
 import PatientCard from "../components/PatientCard";
-
-// Données statiques pour ce lab (remplacées par l'API en Lab React 2)
-const PATIENTS_TEST = [
-  { id: 1, nom: "Diallo", prenom: "Fatou", region: "Dakar", numeroDossier: "SP-A1B2C3D4" },
-  { id: 2, nom: "Ndiaye", prenom: "Ousmane", region: "Thiès", numeroDossier: "SP-E5F6G7H8" },
-  { id: 3, nom: "Sow", prenom: "Aminata", region: "Saint-Louis", numeroDossier: "SP-I9J0K1L2" },
-];
+import { patientService } from "../services/patientsService";
 
 function PatientsPage() {
   const [patients, setPatients] = useState([]);
   const [recherche, setRecherche] = useState("");
   const [chargement, setChargement] = useState(true);
+  const [erreur, setErreur] = useState(null);
 
   useEffect(() => {
-    // Simulation du chargement (Lab React 2 : appel Axios réel)
-    const timer = setTimeout(() => {
-      setPatients(PATIENTS_TEST);
-      setChargement(false);
-    }, 800);
-    return () => clearTimeout(timer);
+    patientService
+      .findAll()
+      .then((data) => setPatients(data))
+      .catch((err) => setErreur("Impossible de charger les patients."))
+      .finally(() => setChargement(false));
   }, []);
 
   const patientsFiltres = patients.filter(
@@ -50,15 +44,22 @@ function PatientsPage() {
           className="w-full border rounded-lg px-4 py-2 mb-6 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400"
         />
 
-        {chargement ? (
-          <p className="text-center text-gray-400 py-12">Chargement des patients...</p>
-        ) : patientsFiltres.length === 0 ? (
-          <p className="text-center text-gray-400 py-12">Aucun patient trouvé.</p>
-        ) : (
+        {chargement && (
+          <p className="text-center text-gray-400 py-12">Chargement...</p>
+        )}
+
+        {erreur && (
+          <p className="text-center text-red-400 py-12">{erreur}</p>
+        )}
+
+        {!chargement && !erreur && (
           <div className="space-y-3">
             {patientsFiltres.map((p) => (
               <PatientCard key={p.id} {...p} />
             ))}
+            {patientsFiltres.length === 0 && (
+              <p className="text-center text-gray-400 py-8">Aucun patient trouvé.</p>
+            )}
           </div>
         )}
       </div>
