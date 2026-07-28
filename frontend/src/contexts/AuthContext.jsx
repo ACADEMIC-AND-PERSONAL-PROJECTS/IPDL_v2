@@ -1,51 +1,57 @@
-import { useState, createContext, useContext } from "react";
-import { login as loginService, register as registerService } from "../services/authService";
+import { createContext, useContext, useState } from "react";
+import { useNavigate } from "react-router-dom";
+import api from "../services/api";
 
-// Objectif: Centraliser toute la logique liee a l'authentification afin que tous les composant de l'application puisse y acceder
-// Creation du contexte afin que n'importe quel composant puisse acceder aux donnees
 const AuthContext = createContext(null);
 
-// Fonction pour gerer toute la logique d'authentification & inscription cote front
-export const AuthProvider = ({ children }) => {
+export function AuthProvider({ children }) {
+  const [user, setUser] = useState(null);
+  const [token, setToken] = useState(null);
+  const [chargement, setChargement] = useState(false);
+  const navigate = useNavigate();
 
-    // Variable pour stocker les donnees d'authentication/inscription
-    const [token, setToken] = useState(null);
-    const [user, setUser] = useState(null);
+  const login = async (email, password) => {
+    setChargement(true);
+    try {
+      const response = await api.post("/api/auth/login", { email, password });
+      const { token: jwt, role, message } = response.data;
 
-    // Gestion de l'authentification
-    const login = async (email, password) => {
-        const data = await loginService(email, password);
-        setToken(data.token);
-        setUser({email: data.email, role: data.role});
-        return data;
-    };
-
-    // Gestion de l'inscription
-    const register = async (nom, prenom, email, password, role, etablissementId) => {
-        const data = await registerService(nom, prenom, email, password, role, etablissementId);
-        setToken(data.token);
-        setUser({email: data.email, role: data.role});
-        return data;
+      // Stocker le token en mémoire
+      window.__token = jwt;
+      setToken(jwt);
+      setUser({ email, role });
+      navigate("/patients");
+      return { succes: true };
+    } catch (error) {
+      const message =
+        error.response?.data?.erreur || "Email ou mot de passe incorrect";
+      return { succes: false, message };
+    } finally {
+      setChargement(false);
     }
+  };
 
-    // Remettre a null les variables lors de la deconnexion
-    const logout = () => {
-        setToken(null);
-        setUser(null);
-    };
+  const logout = () => {
+    window.__token = null;
+    setToken(null);
+    setUser(null);
+    navigate("/login");
+  };
 
-    // Ajouter le bearer token automatiquement
-    const getAuthHeader = () => ({
-        Authorization: `Bearer ${token}`
-    });
+  const estConnecte = !!token;
 
-    return (
-        // Stockage des donnees au niveau du context
-        <AuthContext.Provider value={{token, user, login, register, logout, getAuthHeader}}>
-            {children}
-        </AuthContext.Provider>
-    );
-
+  return (
+    <AuthContext.Provider value={{ user, token, chargement, login, logout, estConnecte }}>
+      {children}
+    </AuthContext.Provider>
+  );
 }
 
-export const useAuth = () => useContext(AuthContext);
+// Hook personnalisé pour utiliser AuthContext
+export function useAuth() {
+  const context = useContext(AuthContext);
+  if (!context) {
+    throw new Error("useAuth doit être utilisé dans AuthProvider");
+  }
+  return context;
+}
