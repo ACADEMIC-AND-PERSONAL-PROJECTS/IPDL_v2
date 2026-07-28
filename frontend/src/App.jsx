@@ -1,26 +1,21 @@
-import PatientCard from "./components/PatientCard";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import LoginPage from "./pages/LoginPage";
+import PatientsPage from "./pages/PatientsPage";
+import ConsultationsPage from "./pages/ConsultationsPage";
+import DashboardPage from "./pages/DashboardPage";
 
 function App() {
   return (
-    <div className="min-h-screen bg-gray-50 p-8">
-      <h1 className="text-2xl font-bold text-blue-800 mb-6">
-        SénSanté Pro — Patients
-      </h1>
-      <div className="space-y-3 max-w-xl">
-        <PatientCard
-          nom="Diallo"
-          prenom="Fatou"
-          region="Dakar"
-          numeroDossier="SP-A1B2C3D4"
-        />
-        <PatientCard
-          nom="Ndiaye"
-          prenom="Ousmane"
-          region="Thiès"
-          numeroDossier="SP-E5F6G7H8"
-        />
-      </div>
-    </div>
+    <BrowserRouter>
+      <Routes>
+        {/* Route par défaut -> login */}
+        <Route path="/" element={<Navigate to="/login" />} />
+        <Route path="/login" element={<LoginPage />} />
+        <Route path="/patients" element={<PatientsPage />} />
+        <Route path="/consultations" element={<ConsultationsPage />} />
+        <Route path="/dashboard" element={<DashboardPage />} />
+      </Routes>
+    </BrowserRouter>
   );
 }
 
