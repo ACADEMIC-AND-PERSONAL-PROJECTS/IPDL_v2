@@ -1,18 +1,18 @@
-import axios from "axios";
+import api from "./api";
 
-const API_URL = "http://localhost:8080/api/patients";
+export const patientService = {
+  findAll: () =>
+    api.get("/api/patients").then((r) => r.data),
 
-export const getAllPatients = async (getAuthHeader) => {
-    const response = await axios.get(API_URL, { headers: getAuthHeader() });
-    return response.data;
-};
+  findById: (id) =>
+    api.get(`/api/patients/${id}`).then((r) => r.data),
 
-export const getPatientById = async (id, getAuthHeader) => {
-    const response = await axios.get(`${API_URL}/${id}`, { headers: getAuthHeader() });
-    return response.data;
-};
+  create: (data) =>
+    api.post("/api/patients", data).then((r) => r.data),
 
-export const createPatient = async (patient, getAuthHeader) => {
-    const response = await axios.post(API_URL, patient, { headers: getAuthHeader() });
-    return response.data;
+  update: (id, data) =>
+    api.put(`/api/patients/${id}`, data).then((r) => r.data),
+
+  search: (nom) =>
+    api.get(`/api/patients/search?nom=${nom}`).then((r) => r.data),
 };
