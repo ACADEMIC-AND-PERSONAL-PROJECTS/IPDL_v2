@@ -1,42 +1,22 @@
-import { useState } from "react";
-import { useAuth } from "./contexts/AuthContext";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import LoginPage from "./pages/LoginPage";
 import PatientsPage from "./pages/PatientsPage";
-import PatientForm from "./pages/PatientForm";
 import ConsultationsPage from "./pages/ConsultationsPage";
 import DashboardPage from "./pages/DashboardPage";
 
 function App() {
-
-    const { token, logout, user } = useAuth();
-    const [page, setPage] = useState("dashboard");
-
-    if (!token) {
-        return <LoginPage />;
-    }
-
-    return (
-        <div style={{ padding: "16px" }}>
-            <div style={{ marginBottom: "16px", padding: "8px", background: "#eee" }}>
-                Connecté : <strong>{user?.email}</strong> ({user?.role})
-                {" | "}
-                <button onClick={() => setPage("dashboard")}>Tableau de bord</button>
-                {" | "}
-                <button onClick={() => setPage("patients")}>Liste patients</button>
-                {" | "}
-                <button onClick={() => setPage("form")}>Nouveau patient</button>
-                {" | "}
-                <button onClick={() => setPage("consultations")}>Consultations</button>
-                {" | "}
-                <button onClick={logout}>Déconnexion</button>
-            </div>
-
-            {page === "dashboard" && <DashboardPage />}
-            {page === "patients" && <PatientsPage />}
-            {page === "form" && <PatientForm />}
-            {page === "consultations" && <ConsultationsPage />}
-        </div>
-    );
+  return (
+    <BrowserRouter>
+      <Routes>
+        {/* Route par défaut -> login */}
+        <Route path="/" element={<Navigate to="/login" />} />
+        <Route path="/login" element={<LoginPage />} />
+        <Route path="/patients" element={<PatientsPage />} />
+        <Route path="/consultations" element={<ConsultationsPage />} />
+        <Route path="/dashboard" element={<DashboardPage />} />
+      </Routes>
+    </BrowserRouter>
+  );
 }
 
 export default App;
