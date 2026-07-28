@@ -34,11 +34,7 @@ public class AnalyticsService {
                 : 0.0;
 
         // ── Consultations du mois en cours ──
-        long consultationsMois = consultationRepository.countConsultationByDate()
-                .stream()
-                .findFirst()
-                .map(r -> (Long) r[1])
-                .orElse(0L);
+        long consultationsMois = consultationRepository.countConsultationsCeMois();
 
         // ── Patients sans aucune consultation ──
         long patientsSansConsultation = patientRepository.countPatientByNoConsultations();

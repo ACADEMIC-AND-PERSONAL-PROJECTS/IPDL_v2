@@ -32,7 +32,7 @@ public interface PatientRepository extends JpaRepository<Patient, Long> {
     List<Object[]> countByEtablissement();
 
     // Patients sans consultations
-    @Query("SELECT p.id, COUNT(p) FROM Patient p WHERE p.id NOT IN (SELECT c.patient.id FROM Consultation c)")
+    @Query("SELECT COUNT(p) FROM Patient p WHERE p.id NOT IN (SELECT c.patient.id FROM Consultation c)")
     Long countPatientByNoConsultations();
 
 }

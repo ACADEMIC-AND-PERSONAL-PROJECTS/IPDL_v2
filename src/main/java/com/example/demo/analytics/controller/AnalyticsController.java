@@ -25,5 +25,5 @@ public class AnalyticsController {
     public ResponseEntity<AnalyticsResumeResponse> getResume() {
         return ResponseEntity.ok(analyticsService.getResume());
     }
-    
+
 }

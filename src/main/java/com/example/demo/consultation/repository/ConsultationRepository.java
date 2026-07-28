@@ -24,10 +24,10 @@ public interface ConsultationRepository extends JpaRepository<Consultation, Long
     long countByPatientId(Long patientId);
 
     // Nombre de consultations du mois
-    @Query("SELECT MONTH(c.date), COUNT(c) " +
+    @Query("SELECT COUNT(c) " +
             "FROM Consultation c " +
-            "WHERE MONTH(c.date)= MONTH(CURRENT_DATE) AND YEAR(c.date)=YEAR(CURRENT_DATE)")
-    List<Object[]> countConsultationByDate();
+            "WHERE MONTH(c.date) = MONTH(CURRENT_DATE) AND YEAR(c.date) = YEAR(CURRENT_DATE)")
+    Long countConsultationsCeMois();
 
     // Nombre de consultations par mois au cours de l'annee
     @Query("SELECT MONTH(c.date), COUNT(c) " +
