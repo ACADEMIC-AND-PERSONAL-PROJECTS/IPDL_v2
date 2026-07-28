@@ -1,13 +1,15 @@
-import axios from "axios";
+import api from "./api";
 
-const API_URL = "http://localhost:8080/api/consultations";
+export const consultationService = {
+  create: (data) =>
+    api.post("/api/consultations", data).then((r) => r.data),
 
-export const getConsultationsByPatient = async (patientId, getAuthHeader) => {
-    const response = await axios.get(`${API_URL}/patient/${patientId}`, { headers: getAuthHeader() });
-    return response.data;
-};
+  findByPatient: (patientId) =>
+    api.get(`/api/consultations/patient/${patientId}`).then((r) => r.data),
 
-export const createConsultation = async (consultation, getAuthHeader) => {
-    const response = await axios.post(API_URL, consultation, { headers: getAuthHeader() });
-    return response.data;
+  findMines: () =>
+    api.get("/api/consultations/mes-consultations").then((r) => r.data),
+
+  cloturer: (id, notes) =>
+    api.patch(`/api/consultations/${id}/cloturer`, null, { params: { notes } }).then((r) => r.data),
 };
