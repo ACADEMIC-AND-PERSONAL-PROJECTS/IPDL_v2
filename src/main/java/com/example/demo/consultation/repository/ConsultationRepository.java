@@ -4,7 +4,9 @@ import com.example.demo.consultation.entity.Consultation;
 import com.example.demo.consultation.entity.Consultation.StatutConsultation;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 public interface ConsultationRepository extends JpaRepository<Consultation, Long> {
@@ -51,7 +53,7 @@ public interface ConsultationRepository extends JpaRepository<Consultation, Long
             "WHERE c.date >= :debut " +
             "GROUP BY YEAR(c.date), MONTH(c.date) " +
             "ORDER BY YEAR(c.date), MONTH(c.date)")
-    List<Object[]> countConsultationByDateMonth6();
+    List<Object[]> countConsultationByDateMonth6(@Param("debut") LocalDateTime debut);
 
     // Taux d'analyse IA
     @Query("SELECT COUNT(c) " +
