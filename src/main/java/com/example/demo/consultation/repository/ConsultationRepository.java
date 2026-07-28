@@ -3,6 +3,7 @@ package com.example.demo.consultation.repository;
 import com.example.demo.consultation.entity.Consultation;
 import com.example.demo.consultation.entity.Consultation.StatutConsultation;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
 
 import java.util.List;
 
@@ -19,5 +20,29 @@ public interface ConsultationRepository extends JpaRepository<Consultation, Long
 
     // Nombre de consultations par patient
     long countByPatientId(Long patientId);
+
+    // Nombre de consultations du mois
+    @Query("SELECT MONTH(c.date), COUNT(c) " +
+            "FROM Consultation c " +
+            "WHERE MONTH(c.date)= MONTH(CURRENT_DATE) AND YEAR(c.date)=YEAR(CURRENT_DATE)")
+    List<Object[]> countConsultationByDate();
+
+    // Nombre de consultations par mois au cours de l'annee
+    @Query("SELECT MONTH(c.date), COUNT(c) " +
+            "FROM Consultation c " +
+            "WHERE YEAR(c.date) = YEAR(CURRENT_DATE) " +
+            "GROUP BY MONTH(c.date)")
+    List<Object[]> countConsultationsParMois();
+
+    // Compter les consultation par region
+    @Query("SELECT c.patient.region, COUNT(c) " +
+            "FROM Consultation c " +
+            "GROUP BY c.patient.region " +
+            "ORDER BY COUNT(c) DESC")
+    List<Object[]> countConsultationsByRegion();
+
+    // Consultation par statuy
+    @Query("SELECT c.statut, COUNT(c) FROM Consultation c GROUP BY c.statut ORDER BY COUNT(c) DESC")
+    List<Object[]> countConsultationsByStatut();
 
 }
