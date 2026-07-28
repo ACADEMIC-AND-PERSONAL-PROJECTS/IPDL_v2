@@ -3,6 +3,7 @@ import { useAuth } from "../contexts/AuthContext";
 import { getAllPatients } from "../services/patientsService";
 import { getConsultationsByPatient, createConsultation } from "../services/consultationsService";
 import { extractErrorMessage, extractFieldErrors } from "../services/apiUtils";
+import DiagnosticIA from "../components/DiagnosticIA";
 
 const STATUT_BADGE = {
     EN_ATTENTE: { label: "En attente", bg: "#ffc107", color: "#000" },
@@ -228,14 +229,10 @@ const ConsultationsPage = () => {
                                 </div>
 
                                 {c.diagnosticIa && (
-                                    <div style={{ marginBottom: "6px" }}>
-                                        <strong>Diagnostic IA :</strong> {c.diagnosticIa}
-                                        {c.scoreConfiance && (
-                                            <span style={{ marginLeft: "8px", fontSize: "0.9em", color: "#6c757d" }}>
-                                                (confiance : {(c.scoreConfiance * 100).toFixed(0)} %)
-                                            </span>
-                                        )}
-                                    </div>
+                                    <DiagnosticIA
+                                        diagnosticIa={c.diagnosticIa}
+                                        scoreConfiance={c.scoreConfiance}
+                                    />
                                 )}
 
                                 {c.notes && (
