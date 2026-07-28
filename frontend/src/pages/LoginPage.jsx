@@ -1,15 +1,20 @@
 import { useState } from "react";
+import { useAuth } from "../contexts/AuthContext";
 
 function LoginPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [erreur, setErreur] = useState("");
+  const { login, chargement } = useAuth();
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    // Appel API dans le Lab React 2
-    console.log("Login submitted");
-    setErreur("Connexion à l'API dans le prochain lab.");
+    setErreur("");
+
+    const resultat = await login(email, password);
+    if (!resultat.succes) {
+      setErreur(resultat.message);
+    }
   };
 
   return (
@@ -51,14 +56,15 @@ function LoginPage() {
           </div>
 
           {erreur && (
-            <p className="text-red-500 text-xs text-center">{erreur}</p>
+            <p className="text-red-500 text-xs text-center bg-red-50 py-2 rounded-lg">{erreur}</p>
           )}
 
           <button
             type="submit"
-            className="w-full bg-blue-700 text-white rounded-lg py-2 font-medium hover:bg-blue-800 transition-colors"
+            disabled={chargement}
+            className="w-full bg-blue-700 text-white rounded-lg py-2 font-medium hover:bg-blue-800 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            Connexion
+            {chargement ? "Connexion en cours..." : "Connexion"}
           </button>
         </form>
       </div>
