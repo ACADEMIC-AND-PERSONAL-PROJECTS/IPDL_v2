@@ -1,4 +1,5 @@
-import { Link } from "react-router-dom";
+import { Link, Navigate } from "react-router-dom";
+import { useAuth } from "../contexts/AuthContext";
 import {
   HiOutlineUserGroup,
   HiOutlineClipboardDocumentCheck,
@@ -63,6 +64,12 @@ const steps = [
 ];
 
 export default function LandingPage() {
+  const { estConnecte } = useAuth();
+
+  if (estConnecte) {
+    return <Navigate to="/dashboard" replace />;
+  }
+
   return (
     <div className="min-h-screen font-sans antialiased bg-canvas">
       {/* ── Navbar ── */}

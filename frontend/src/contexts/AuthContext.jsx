@@ -20,7 +20,7 @@ export function AuthProvider({ children }) {
       window.__token = jwt;
       setToken(jwt);
       setUser({ email, role });
-      navigate("/patients");
+      navigate("/dashboard");
       return { succes: true };
     } catch (error) {
       const message =
