@@ -106,11 +106,11 @@
 			<scope>test</scope>
 		</dependency>
 
-		<!-- JWT - Librairie JJWT (Java JWT) -->
+		<!-- JWT - Librairie JJWT (Java JWT) 0.12.6 (vulnerabilite corrigee) -->
 		<dependency>
 			<groupId>io.jsonwebtoken</groupId>
 			<artifactId>jjwt-api</artifactId>
-			<version>0.11.5</version>
+			<version>0.12.6</version>
 		</dependency>
 		<dependency>
 			<groupId>io.jsonwebtoken</groupId>
@@ -121,7 +121,7 @@
 		<dependency>
 			<groupId>io.jsonwebtoken</groupId>
 			<artifactId>jjwt-jackson</artifactId>
-			<version>0.11.5</version>
+			<version>0.12.6</version>
 			<scope>runtime</scope>
 		</dependency>
 
