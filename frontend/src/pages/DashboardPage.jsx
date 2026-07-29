@@ -2,33 +2,89 @@ import { useState, useEffect } from "react";
 import {
   BarChart, Bar, XAxis, YAxis, Tooltip,
   ResponsiveContainer, PieChart, Pie, Cell,
-  LineChart, Line, CartesianGrid, Legend,
+  LineChart, Line, CartesianGrid,
   AreaChart, Area,
 } from "recharts";
 import NavBar from "../components/NavBar";
 import { analyticsService } from "../services/analyticsService";
+import {
+  HiOutlineUserGroup,
+  HiOutlineClipboardDocumentCheck,
+  HiOutlineCalendarDays,
+  HiOutlineSparkles,
+  HiOutlineCheckCircle,
+  HiOutlineExclamationCircle,
+} from "react-icons/hi2";
 
+// ── Palettes ──
 const COULEURS_STATUT = {
-  EN_ATTENTE: "#FCD34D",
-  ANALYSEE: "#34D399",
-  CLOTUREE: "#9CA3AF",
+  EN_ATTENTE: "#e8a020",
+  ANALYSEE: "#2d9f6d",
+  CLOTUREE: "#a3afbd",
 };
 
-const COULEURS_REGIONS = ["#3B82F6", "#8B5CF6", "#EC4899", "#F59E0B", "#10B981", "#EF4444", "#6366F1", "#14B8A6"];
+const COULEURS_REGIONS = [
+  "#1a6ff5", "#7c5ce7", "#e74b4b", "#e8a020",
+  "#2d9f6d", "#0ea5e9", "#c2644a", "#6366f1",
+];
 
-function CarteKpi({ label, valeur, unite, couleur, icone }) {
+const COULEURS_ETABLISSEMENTS = [
+  "#2d9f6d", "#1a6ff5", "#7c5ce7", "#e8a020",
+  "#c2644a", "#0ea5e9", "#e74b4b", "#6366f1",
+];
+
+// ── Custom Tooltip ──
+function CustomTooltip({ active, payload, label }) {
+  if (!active || !payload?.length) return null;
   return (
-    <div className={`rounded-xl p-5 ${couleur} shadow-sm hover:shadow-md transition-shadow`}>
-      <div className="flex items-center justify-between mb-2">
-        <span className="text-2xl">{icone}</span>
-      </div>
-      <p className="text-3xl font-bold">{valeur}</p>
-      {unite && <p className="text-sm opacity-75">{unite}</p>}
-      <p className="text-sm font-medium mt-2 opacity-80">{label}</p>
+    <div className="rounded-xl border border-line bg-white px-4 py-3 shadow-xl">
+      <p className="text-xs font-semibold text-ink-faint uppercase tracking-wide mb-1">
+        {label}
+      </p>
+      {payload.map((entry, i) => (
+        <p key={i} className="text-sm font-bold text-ink" style={{ color: entry.color }}>
+          {entry.value.toLocaleString("fr-FR")} {entry.name}
+        </p>
+      ))}
     </div>
   );
 }
 
+// ── KPI Card ──
+function CarteKpi({ label, valeur, unite, icon, accent }) {
+  return (
+    <div className="ss-kpi group">
+      <div className="flex items-start justify-between mb-3">
+        <span className={`flex h-10 w-10 items-center justify-center rounded-xl ${accent.bg} ${accent.text} ring-1 ring-black/5 transition-transform duration-300 group-hover:scale-110`}>
+          {icon}
+        </span>
+      </div>
+      <div className="flex items-baseline gap-1.5">
+        <span className="text-2xl font-extrabold text-ink tabular-nums">
+          {typeof valeur === "number" ? valeur.toLocaleString("fr-FR") : valeur}
+        </span>
+        {unite && (
+          <span className="text-sm font-medium text-ink-faint">{unite}</span>
+        )}
+      </div>
+      <p className="text-[13px] font-medium text-ink-muted mt-1.5">{label}</p>
+    </div>
+  );
+}
+
+// ── Section Header ──
+function SectionHeader({ title, subtitle }) {
+  return (
+    <div className="mb-4">
+      <h2 className="text-sm font-bold text-ink">{title}</h2>
+      {subtitle && (
+        <p className="text-xs text-ink-faint mt-0.5">{subtitle}</p>
+      )}
+    </div>
+  );
+}
+
+// ── Page ──
 function DashboardPage() {
   const [stats, setStats] = useState(null);
   const [chargement, setChargement] = useState(true);
@@ -42,146 +98,213 @@ function DashboardPage() {
       .finally(() => setChargement(false));
   }, []);
 
-  if (chargement) return (
-    <div className="min-h-screen bg-gray-50">
-      <NavBar />
-      <div className="flex items-center justify-center py-24">
-        <div className="text-center">
-          <div className="w-10 h-10 border-4 border-blue-200 border-t-blue-600 rounded-full animate-spin mx-auto mb-4" />
-          <p className="text-gray-400">Chargement du tableau de bord...</p>
+  if (chargement)
+    return (
+      <div className="min-h-screen bg-canvas">
+        <NavBar />
+        <div className="flex flex-col items-center justify-center py-32">
+          <div className="w-12 h-12 border-[3px] border-brand-faint border-t-brand rounded-full animate-spin mb-5" />
+          <p className="text-ink-muted text-sm font-medium">
+            Chargement du tableau de bord…
+          </p>
         </div>
       </div>
-    </div>
-  );
+    );
 
-  if (erreur) return (
-    <div className="min-h-screen bg-gray-50">
-      <NavBar />
-      <div className="flex items-center justify-center py-24">
-        <div className="text-center bg-red-50 rounded-xl p-8 max-w-md">
-          <span className="text-4xl">⚠️</span>
-          <p className="text-red-500 mt-3">{erreur}</p>
+  if (erreur)
+    return (
+      <div className="min-h-screen bg-canvas">
+        <NavBar />
+        <div className="flex items-center justify-center py-32">
+          <div className="text-center max-w-sm">
+            <div className="inline-flex h-16 w-16 items-center justify-center rounded-2xl bg-danger-soft text-danger ring-1 ring-danger-faint mb-5">
+              <HiOutlineExclamationCircle className="h-8 w-8" />
+            </div>
+            <p className="text-danger font-semibold">{erreur}</p>
+            <p className="text-ink-faint text-sm mt-2">
+              Veuillez réessayer dans quelques instants.
+            </p>
+          </div>
         </div>
       </div>
-    </div>
-  );
+    );
 
   const donneesStatut = stats.consultationsByStatut.map((s) => ({
-    name: s.statut,
+    name: s.statut === "EN_ATTENTE" ? "En attente" : s.statut === "ANALYSEE" ? "Analysée" : "Clôturée",
     value: s.count,
+    statut: s.statut,
   }));
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-canvas">
       <NavBar />
-      <div className="max-w-6xl mx-auto px-4 py-8">
+      <div className="ss-page">
+        {/* Page header */}
         <div className="flex items-center justify-between mb-8">
           <div>
-            <h1 className="text-2xl font-bold text-gray-800">Tableau de bord</h1>
-            <p className="text-sm text-gray-400 mt-1">Vue d'ensemble de l'activité SénSanté Pro</p>
+            <h1 className="ss-section-title">Tableau de bord</h1>
+            <p className="ss-section-sub">
+              Vue d'ensemble de l'activité de votre établissement
+            </p>
           </div>
         </div>
 
-        {/* KPIs — 6 cartes */}
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 mb-8">
+        {/* ── KPI Cards ── */}
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 mb-8 ss-stagger">
           <CarteKpi
             label="Patients"
             valeur={stats.totalPatients}
-            icone="👥"
-            couleur="bg-blue-50 text-blue-700 border border-blue-100"
+            icon={<HiOutlineUserGroup className="h-5 w-5" />}
+            accent={{ bg: "bg-brand-soft", text: "text-brand" }}
           />
           <CarteKpi
             label="Consultations"
             valeur={stats.totalConsultations}
-            icone="🩺"
-            couleur="bg-green-50 text-green-700 border border-green-100"
+            icon={<HiOutlineClipboardDocumentCheck className="h-5 w-5" />}
+            accent={{ bg: "bg-leaf-soft", text: "text-leaf" }}
           />
           <CarteKpi
             label="Ce mois"
             valeur={stats.consultationsMois}
-            icone="📅"
-            couleur="bg-purple-50 text-purple-700 border border-purple-100"
+            icon={<HiOutlineCalendarDays className="h-5 w-5" />}
+            accent={{ bg: "bg-bloom-soft", text: "text-bloom" }}
           />
           <CarteKpi
             label="Taux IA"
             valeur={stats.tauxAnalyseIa}
             unite="%"
-            icone="🤖"
-            couleur="bg-orange-50 text-orange-700 border border-orange-100"
+            icon={<HiOutlineSparkles className="h-5 w-5" />}
+            accent={{ bg: "bg-warm-soft", text: "text-warm" }}
           />
           <CarteKpi
             label="Taux clôture"
             valeur={stats.tauxCloture}
             unite="%"
-            icone="✅"
-            couleur="bg-emerald-50 text-emerald-700 border border-emerald-100"
+            icon={<HiOutlineCheckCircle className="h-5 w-5" />}
+            accent={{ bg: "bg-leaf-soft", text: "text-leaf" }}
           />
           <CarteKpi
             label="Sans suivi"
             valeur={stats.patientsSansConsultation}
-            icone="🔍"
-            couleur="bg-red-50 text-red-700 border border-red-100"
+            icon={<HiOutlineExclamationCircle className="h-5 w-5" />}
+            accent={{ bg: "bg-danger-soft", text: "text-danger" }}
           />
         </div>
 
-        {/* Rangée 1 : Patients par région | Consultations par région */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
-          <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
-            <h2 className="text-sm font-semibold text-gray-700 mb-1">Patients par région</h2>
-            <p className="text-xs text-gray-400 mb-5">Répartition géographique des dossiers</p>
-            <ResponsiveContainer width="100%" height={260}>
-              <BarChart data={stats.patientsByRegion}>
-                <XAxis dataKey="region" tick={{ fontSize: 11 }} />
-                <YAxis allowDecimals={false} tick={{ fontSize: 11 }} />
-                <Tooltip
-                  contentStyle={{ borderRadius: 8, border: "none", boxShadow: "0 4px 12px rgba(0,0,0,0.1)" }}
+        {/* ── Row 1: Patients par région | Consultations par région ── */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-5 mb-5">
+          {/* Patients par région — barres verticales */}
+          <div className="ss-chart-card">
+            <SectionHeader
+              title="Patients par région"
+              subtitle="Répartition géographique des dossiers"
+            />
+            <ResponsiveContainer width="100%" height={280}>
+              <BarChart data={stats.patientsByRegion} barCategoryGap="35%">
+                <CartesianGrid strokeDasharray="3 3" stroke="#f0f2f6" vertical={false} />
+                <XAxis
+                  dataKey="region"
+                  tick={{ fontSize: 11, fill: "#6b7a8d" }}
+                  axisLine={{ stroke: "#e5e9f0" }}
+                  tickLine={false}
                 />
-                <Bar dataKey="count" name="Patients" radius={[4, 4, 0, 0]}>
+                <YAxis
+                  allowDecimals={false}
+                  tick={{ fontSize: 11, fill: "#6b7a8d" }}
+                  axisLine={false}
+                  tickLine={false}
+                />
+                <Tooltip content={<CustomTooltip />} cursor={{ fill: "#f8f9fb" }} />
+                <Bar dataKey="count" name="Patients" radius={[6, 6, 0, 0]} maxBarSize={48}>
                   {stats.patientsByRegion.map((_, i) => (
-                    <Cell key={i} fill={COULEURS_REGIONS[i % COULEURS_REGIONS.length]} />
+                    <Cell
+                      key={i}
+                      fill={COULEURS_REGIONS[i % COULEURS_REGIONS.length]}
+                      style={{ filter: "brightness(1)" }}
+                    />
                   ))}
                 </Bar>
               </BarChart>
             </ResponsiveContainer>
           </div>
 
-          <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
-            <h2 className="text-sm font-semibold text-gray-700 mb-1">Consultations par région</h2>
-            <p className="text-xs text-gray-400 mb-5">Volume d'activité par zone</p>
-            <ResponsiveContainer width="100%" height={260}>
-              <BarChart data={stats.consultationsByRegion} layout="vertical">
-                <XAxis type="number" allowDecimals={false} tick={{ fontSize: 11 }} />
-                <YAxis type="category" dataKey="region" tick={{ fontSize: 11 }} width={80} />
-                <Tooltip
-                  contentStyle={{ borderRadius: 8, border: "none", boxShadow: "0 4px 12px rgba(0,0,0,0.1)" }}
+          {/* Consultations par région — barres horizontales */}
+          <div className="ss-chart-card">
+            <SectionHeader
+              title="Consultations par région"
+              subtitle="Volume d'activité par zone géographique"
+            />
+            <ResponsiveContainer width="100%" height={280}>
+              <BarChart data={stats.consultationsByRegion} layout="vertical" barCategoryGap="30%">
+                <CartesianGrid strokeDasharray="3 3" stroke="#f0f2f6" horizontal={false} />
+                <XAxis
+                  type="number"
+                  allowDecimals={false}
+                  tick={{ fontSize: 11, fill: "#6b7a8d" }}
+                  axisLine={false}
+                  tickLine={false}
                 />
-                <Bar dataKey="count" name="Consultations" fill="#8B5CF6" radius={[0, 4, 4, 0]} />
+                <YAxis
+                  type="category"
+                  dataKey="region"
+                  tick={{ fontSize: 11, fill: "#6b7a8d" }}
+                  axisLine={false}
+                  tickLine={false}
+                  width={85}
+                />
+                <Tooltip content={<CustomTooltip />} cursor={{ fill: "#f8f9fb" }} />
+                <Bar dataKey="count" name="Consultations" fill="#7c5ce7" radius={[0, 6, 6, 0]} maxBarSize={24} />
               </BarChart>
             </ResponsiveContainer>
           </div>
         </div>
 
-        {/* Rangée 2 : Patients par établissement | Statuts (camembert) */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
-          <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
-            <h2 className="text-sm font-semibold text-gray-700 mb-1">Patients par établissement</h2>
-            <p className="text-xs text-gray-400 mb-5">Couverture par structure de santé</p>
-            <ResponsiveContainer width="100%" height={260}>
-              <BarChart data={stats.patientsByEtablissement} layout="vertical">
-                <XAxis type="number" allowDecimals={false} tick={{ fontSize: 11 }} />
-                <YAxis type="category" dataKey="etablissement" tick={{ fontSize: 10 }} width={100} />
-                <Tooltip
-                  contentStyle={{ borderRadius: 8, border: "none", boxShadow: "0 4px 12px rgba(0,0,0,0.1)" }}
+        {/* ── Row 2: Patients par établissement | Statuts ── */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-5 mb-5">
+          {/* Patients par établissement — barres horizontales */}
+          <div className="ss-chart-card">
+            <SectionHeader
+              title="Patients par établissement"
+              subtitle="Couverture par structure de santé"
+            />
+            <ResponsiveContainer width="100%" height={280}>
+              <BarChart data={stats.patientsByEtablissement} layout="vertical" barCategoryGap="30%">
+                <CartesianGrid strokeDasharray="3 3" stroke="#f0f2f6" horizontal={false} />
+                <XAxis
+                  type="number"
+                  allowDecimals={false}
+                  tick={{ fontSize: 11, fill: "#6b7a8d" }}
+                  axisLine={false}
+                  tickLine={false}
                 />
-                <Bar dataKey="count" name="Patients" fill="#10B981" radius={[0, 4, 4, 0]} />
+                <YAxis
+                  type="category"
+                  dataKey="etablissement"
+                  tick={{ fontSize: 10, fill: "#6b7a8d" }}
+                  axisLine={false}
+                  tickLine={false}
+                  width={105}
+                />
+                <Tooltip content={<CustomTooltip />} cursor={{ fill: "#f8f9fb" }} />
+                <Bar dataKey="count" name="Patients" radius={[0, 6, 6, 0]} maxBarSize={24}>
+                  {stats.patientsByEtablissement.map((_, i) => (
+                    <Cell
+                      key={i}
+                      fill={COULEURS_ETABLISSEMENTS[i % COULEURS_ETABLISSEMENTS.length]}
+                    />
+                  ))}
+                </Bar>
               </BarChart>
             </ResponsiveContainer>
           </div>
 
-          <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
-            <h2 className="text-sm font-semibold text-gray-700 mb-1">Statut des consultations</h2>
-            <p className="text-xs text-gray-400 mb-5">En attente / Analysées / Clôturées</p>
-            <ResponsiveContainer width="100%" height={260}>
+          {/* Statuts — donut */}
+          <div className="ss-chart-card">
+            <SectionHeader
+              title="Statut des consultations"
+              subtitle="En attente / Analysées / Clôturées"
+            />
+            <ResponsiveContainer width="100%" height={280}>
               <PieChart>
                 <Pie
                   data={donneesStatut}
@@ -189,77 +312,102 @@ function DashboardPage() {
                   nameKey="name"
                   cx="50%"
                   cy="50%"
-                  outerRadius={90}
-                  innerRadius={45}
+                  outerRadius={95}
+                  innerRadius={52}
+                  paddingAngle={3}
+                  strokeWidth={0}
                   label={({ name, percent }) =>
-                    `${name} ${(percent * 100).toFixed(0)}%`
+                    `${name} (${(percent * 100).toFixed(0)}%)`
                   }
-                  labelLine={{ strokeWidth: 1 }}
+                  labelLine={{ stroke: "#e5e9f0", strokeWidth: 1 }}
                 >
                   {donneesStatut.map((entry, index) => (
-                    <Cell key={index} fill={COULEURS_STATUT[entry.name] || "#6B7280"} />
+                    <Cell
+                      key={index}
+                      fill={COULEURS_STATUT[entry.statut] || "#a3afbd"}
+                    />
                   ))}
                 </Pie>
-                <Tooltip
-                  contentStyle={{ borderRadius: 8, border: "none", boxShadow: "0 4px 12px rgba(0,0,0,0.1)" }}
-                />
+                <Tooltip content={<CustomTooltip />} />
               </PieChart>
             </ResponsiveContainer>
           </div>
         </div>
 
-        {/* Rangée 3 : 6 derniers mois | Année en cours (courbes côte à côte) */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
-          <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
-            <h2 className="text-sm font-semibold text-gray-700 mb-1">Consultations — 6 derniers mois</h2>
-            <p className="text-xs text-gray-400 mb-5">Tendance récente</p>
-            <ResponsiveContainer width="100%" height={260}>
+        {/* ── Row 3: 6 derniers mois | Année en cours ── */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-5 mb-5">
+          {/* Area chart — 6 derniers mois */}
+          <div className="ss-chart-card">
+            <SectionHeader
+              title="Consultations — 6 derniers mois"
+              subtitle="Tendance récente de l'activité"
+            />
+            <ResponsiveContainer width="100%" height={280}>
               <AreaChart data={stats.consultations6DerniersMois}>
                 <defs>
-                  <linearGradient id="colorCount6" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="#3B82F6" stopOpacity={0.3} />
-                    <stop offset="95%" stopColor="#3B82F6" stopOpacity={0} />
+                  <linearGradient id="areaGrad" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%" stopColor="#1a6ff5" stopOpacity={0.2} />
+                    <stop offset="100%" stopColor="#1a6ff5" stopOpacity={0} />
                   </linearGradient>
                 </defs>
-                <CartesianGrid strokeDasharray="3 3" stroke="#F3F4F6" />
-                <XAxis dataKey="mois" tick={{ fontSize: 11 }} />
-                <YAxis allowDecimals={false} tick={{ fontSize: 11 }} />
-                <Tooltip
-                  contentStyle={{ borderRadius: 8, border: "none", boxShadow: "0 4px 12px rgba(0,0,0,0.1)" }}
+                <CartesianGrid strokeDasharray="3 3" stroke="#f0f2f6" vertical={false} />
+                <XAxis
+                  dataKey="mois"
+                  tick={{ fontSize: 11, fill: "#6b7a8d" }}
+                  axisLine={{ stroke: "#e5e9f0" }}
+                  tickLine={false}
                 />
+                <YAxis
+                  allowDecimals={false}
+                  tick={{ fontSize: 11, fill: "#6b7a8d" }}
+                  axisLine={false}
+                  tickLine={false}
+                />
+                <Tooltip content={<CustomTooltip />} />
                 <Area
                   type="monotone"
                   dataKey="count"
                   name="Consultations"
-                  stroke="#3B82F6"
-                  strokeWidth={2}
-                  fill="url(#colorCount6)"
-                  dot={{ r: 4, fill: "#3B82F6" }}
-                  activeDot={{ r: 6 }}
+                  stroke="#1a6ff5"
+                  strokeWidth={2.5}
+                  fill="url(#areaGrad)"
+                  dot={{ r: 4, fill: "#1a6ff5", strokeWidth: 2, stroke: "#fff" }}
+                  activeDot={{ r: 6, fill: "#1a6ff5", strokeWidth: 3, stroke: "#fff" }}
                 />
               </AreaChart>
             </ResponsiveContainer>
           </div>
 
-          <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
-            <h2 className="text-sm font-semibold text-gray-700 mb-1">Consultations — Année en cours</h2>
-            <p className="text-xs text-gray-400 mb-5">Évolution mensuelle</p>
-            <ResponsiveContainer width="100%" height={260}>
+          {/* Line chart — année en cours */}
+          <div className="ss-chart-card">
+            <SectionHeader
+              title="Consultations — Année en cours"
+              subtitle="Évolution mensuelle"
+            />
+            <ResponsiveContainer width="100%" height={280}>
               <LineChart data={stats.consultationsParMoisAnnee}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#F3F4F6" />
-                <XAxis dataKey="mois" tick={{ fontSize: 11 }} />
-                <YAxis allowDecimals={false} tick={{ fontSize: 11 }} />
-                <Tooltip
-                  contentStyle={{ borderRadius: 8, border: "none", boxShadow: "0 4px 12px rgba(0,0,0,0.1)" }}
+                <CartesianGrid strokeDasharray="3 3" stroke="#f0f2f6" vertical={false} />
+                <XAxis
+                  dataKey="mois"
+                  tick={{ fontSize: 11, fill: "#6b7a8d" }}
+                  axisLine={{ stroke: "#e5e9f0" }}
+                  tickLine={false}
                 />
+                <YAxis
+                  allowDecimals={false}
+                  tick={{ fontSize: 11, fill: "#6b7a8d" }}
+                  axisLine={false}
+                  tickLine={false}
+                />
+                <Tooltip content={<CustomTooltip />} />
                 <Line
                   type="monotone"
                   dataKey="count"
                   name="Consultations"
-                  stroke="#8B5CF6"
-                  strokeWidth={2}
-                  dot={{ r: 4, fill: "#8B5CF6" }}
-                  activeDot={{ r: 6 }}
+                  stroke="#7c5ce7"
+                  strokeWidth={2.5}
+                  dot={{ r: 4, fill: "#7c5ce7", strokeWidth: 2, stroke: "#fff" }}
+                  activeDot={{ r: 6, fill: "#7c5ce7", strokeWidth: 3, stroke: "#fff" }}
                 />
               </LineChart>
             </ResponsiveContainer>
