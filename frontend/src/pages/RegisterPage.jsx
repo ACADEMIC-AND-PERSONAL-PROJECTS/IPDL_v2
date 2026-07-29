@@ -30,7 +30,7 @@ function RegisterPage() {
 
   useEffect(() => {
     api
-      .get("/api/etablissements")
+      .get("/api/auth/etablissements")
       .then((r) => setEtablissements(Array.isArray(r.data) ? r.data : []))
       .catch(() => setEtablissements([]));
   }, []);

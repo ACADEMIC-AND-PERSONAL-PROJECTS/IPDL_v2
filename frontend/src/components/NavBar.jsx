@@ -8,9 +8,9 @@ import {
 } from "react-icons/hi2";
 
 const liens = [
+  { path: "/dashboard", label: "Dashboard", icon: HiOutlineChartPie },
   { path: "/patients", label: "Patients", icon: HiOutlineUserGroup },
   { path: "/consultations", label: "Consultations", icon: HiOutlineClipboardDocumentCheck },
-  { path: "/dashboard", label: "Dashboard", icon: HiOutlineChartPie },
 ];
 
 function NavBar() {
@@ -23,7 +23,7 @@ function NavBar() {
         {/* Brand + Nav links */}
         <div className="flex items-center gap-8">
           <Link
-            to="/patients"
+            to="/dashboard"
             className="flex items-center gap-2 font-display text-lg font-bold tracking-tight text-ink hover:text-brand transition-colors"
           >
             <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-brand text-white text-xs font-bold shadow-sm">
