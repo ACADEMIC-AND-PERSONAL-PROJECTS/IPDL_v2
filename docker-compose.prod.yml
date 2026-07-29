@@ -34,7 +34,7 @@ services:
   frontend:
     image: ghcr.io/${GITHUB_REPOSITORY}/frontend:${IMAGE_TAG}
     ports:
-      - "80:80"
+      - "8088:80"
     depends_on:
       - backend
     restart: unless-stopped
