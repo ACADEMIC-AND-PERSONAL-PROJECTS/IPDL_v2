@@ -20,6 +20,13 @@ api.interceptors.request.use(
   (error) => Promise.reject(error)
 );
 
+// Pages publiques — ne pas rediriger vers login si on y est déjà
+const PUBLIC_PATHS = ["/", "/login", "/register"];
+
+function isPublicPage() {
+  return PUBLIC_PATHS.includes(window.location.pathname);
+}
+
 // Intercepteur de réponse — gère les 401 globalement
 api.interceptors.response.use(
   (response) => response,
@@ -27,7 +34,10 @@ api.interceptors.response.use(
     if (error.response?.status === 401) {
       // Token expiré ou invalide — rediriger vers login
       window.__token = null;
-      window.location.href = "/login";
+      // Ne pas boucler : si déjà sur une page publique, on laisse le caller gérer
+      if (!isPublicPage()) {
+        window.location.href = "/login";
+      }
     }
     return Promise.reject(error);
   }
