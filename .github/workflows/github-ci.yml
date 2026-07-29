@@ -44,6 +44,8 @@ jobs:
             cache: 'maven'
 
         - name: Exécution des tests
+          env:
+            ANTHROPIC_AUTH_TOKEN: ${{ secrets.ANTHROPIC_AUTH_TOKEN }}
           run: |
             echo "Tests Spring Boot SenSante Pro"
             mvn test --no-transfer-progress
