@@ -19,8 +19,11 @@ import org.springframework.stereotype.Component;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
+import java.util.concurrent.ThreadLocalRandom;
 
 @Component
 @RequiredArgsConstructor
@@ -135,6 +138,111 @@ public class DataInitializer implements CommandLineRunner {
         return patientRepository.saveAll(patients);
     }
 
+    // ── Banques de données médicales realistés (Afrique de l'Ouest) ──
+
+    private static final List<SymptomeDiagnostic> SCENARIOS = List.of(
+            new SymptomeDiagnostic(
+                    "Fièvre 39°C depuis 3 jours. Céphalées intenses. Courbatures généralisées. Frissons.",
+                    "Paludisme simple - Plasmodium falciparum", 0.94, StatutConsultation.CLOTUREE,
+                    "TDR positif. Traitement ACT prescrit. RDV de contrôle dans 1 semaine."
+            ),
+            new SymptomeDiagnostic(
+                    "Douleurs abdominales diffuses. Brûlures mictionnelles. Pollakiurie. Urines troubles.",
+                    "Infection urinaire basse - Cystite aiguë", 0.87, StatutConsultation.ANALYSEE,
+                    "BU positive aux leucocytes et nitrites. ECBU demandé."
+            ),
+            new SymptomeDiagnostic(
+                    "Toux productive depuis 1 semaine. Douleur thoracique légère. Expectorations verdâtres. Fièvre 38.2°C.",
+                    "Bronchite aiguë infectieuse", 0.82, StatutConsultation.CLOTUREE,
+                    "Auscultation : râles bronchiques bilatéraux. Antibiothérapie orale 7 jours."
+            ),
+            new SymptomeDiagnostic(
+                    "Céphalées chroniques. Vertiges occasionnels. Acouphènes. Epistaxis récentes.",
+                    "Hypertension artérielle essentielle stade 1", 0.91, StatutConsultation.CLOTUREE,
+                    "TA 148/92 mmHg. Conseils hygiéno-diététiques. Suivi tensionnel à domicile. Contrôle dans 3 mois."
+            ),
+            new SymptomeDiagnostic(
+                    "Diarrhée aqueuse depuis 48h. Douleurs abdominales. Nausées. Pas de fièvre.",
+                    "Gastro-entérite aiguë virale", 0.78, StatutConsultation.CLOTUREE,
+                    "Réhydratation orale. Surveillance signes de déshydratation. Régime anti-diarrhéique."
+            ),
+            new SymptomeDiagnostic(
+                    "Amaigrissement inexpliqué. Fatigue chronique. Sueurs nocturnes. Toux persistante depuis 1 mois.",
+                    "Tuberculose pulmonaire suspectée", 0.76, StatutConsultation.ANALYSEE,
+                    "Test GeneXpert demandé. Isolement respiratoire provisoire. BK crachats x3."
+            ),
+            new SymptomeDiagnostic(
+                    "Céphalées frontales. Rhinorrhée purulente. Obstruction nasale bilatérale depuis 10 jours.",
+                    "Sinusite aiguë bactérienne", 0.89, StatutConsultation.CLOTUREE,
+                    "Antibiothérapie 10 jours. Lavage de nez au sérum physiologique. Antalgiques."
+            ),
+            new SymptomeDiagnostic(
+                    "Lombalgie mécanique chronique. Irradiation fesse droite. Aggravée par la position assise.",
+                    "Lombosciatique droite - Hernie discale L4-L5", 0.84, StatutConsultation.ANALYSEE,
+                    "IRM lombaire demandée. Antalgiques palier 2. Kinésithérapie prescrite."
+            ),
+            new SymptomeDiagnostic(
+                    "Prurit cutané généralisé. Lésions de grattage entre les doigts. Atteinte familiale.",
+                    "Gale sarcoptique commune", 0.96, StatutConsultation.CLOTUREE,
+                    "Traitement Benzoate de Benzyle. Literie décontaminée. Dépistage familial."
+            ),
+            new SymptomeDiagnostic(
+                    "Ictère conjonctival. Urines foncées. Douleur hypocondre droit. Nausées depuis 5 jours.",
+                    "Hépatite virale aiguë - suspicion hépatite E", 0.72, StatutConsultation.ANALYSEE,
+                    "Bilan hépatique demandé. Sérologies hépatites virales. Repos strict."
+            ),
+            new SymptomeDiagnostic(
+                    "Plaie au pied droit. Écoulement purulent. Œdème local. Notion de diabète. Déséquilibre glycémique.",
+                    "Pied diabétique infecté - Grade 2", 0.93, StatutConsultation.CLOTUREE,
+                    "Débridement local. Antibiothérapie ciblée. Équilibre glycémique. Soins IDE quotidiens."
+            ),
+            new SymptomeDiagnostic(
+                    "Convulsions fébriles chez enfant de 3 ans. Perte de connaissance brève. Antécédent de paludisme.",
+                    "Crise convulsive fébrile - Neuropaludisme suspecté", 0.65, StatutConsultation.EN_ATTENTE,
+                    "TDR Paludisme en urgence. À transférer si confirmé. Surveillance neurologique."
+            ),
+            new SymptomeDiagnostic(
+                    "Douleur épigastrique à jeun. Brûlures rétrosternales. Régurgitations acides. Calmé par alimentation.",
+                    "Ulcère gastroduodénal - Gastrite chronique à Helicobacter pylori", 0.88, StatutConsultation.CLOTUREE,
+                    "Test Helicobacter demandé. IPP prescrits. Éviction AINS. Régime adapté."
+            ),
+            new SymptomeDiagnostic(
+                    "Dyspnée d'effort. Toux sèche nocturne. Orthopnée. Œdèmes des membres inférieurs.",
+                    "Insuffisance cardiaque congestive débutante", 0.81, StatutConsultation.ANALYSEE,
+                    "ECG et échographie cardiaque demandés. Régime hyposodé. Diurétiques à discuter."
+            ),
+            new SymptomeDiagnostic(
+                    "Anémie sévère. Pâleur cutanéo-muqueuse. Asthénie majeure. Alimentation carencée.",
+                    "Anémie ferriprive sévère - Carence nutritionnelle", 0.91, StatutConsultation.CLOTUREE,
+                    "NFS faite : Hb 6.2 g/dL. Supplémentation martiale. Éducation nutritionnelle."
+            ),
+            new SymptomeDiagnostic(
+                    "Sensation de corps étranger oculaire. Rougeur unilatérale. Photophobie modérée.",
+                    "Conjonctivite bactérienne aiguë", 0.95, StatutConsultation.CLOTUREE,
+                    "Collyre antibiotique 7 jours. Consignes d'hygiène oculaire."
+            ),
+            new SymptomeDiagnostic(
+                    "Toux avec hémoptysie minime. Amaigrissement rapide. Tabagisme chronique 25 PA. Douleur thoracique.",
+                    "Carcinome bronchique suspecté - Bilan à compléter", 0.58, StatutConsultation.EN_ATTENTE,
+                    "Radiographie thoracique. Scanner thoracique à programmer. Avis pneumologique."
+            ),
+            new SymptomeDiagnostic(
+                    "Polyurie. Polydipsie. Polyphagie. Glycosurie à la BU. Perte de poids récente.",
+                    "Diabète sucré inaugural - Type 2 probable", 0.85, StatutConsultation.ANALYSEE,
+                    "Glycémie à jeun et HbA1c demandées. Éducation thérapeutique programmée."
+            ),
+            new SymptomeDiagnostic(
+                    "Crise drépanocytaire. Douleurs osseuses diffuses. Pâleur. Notion de drépanocytose SS connue.",
+                    "Crise vaso-occlusive drépanocytaire", 0.97, StatutConsultation.CLOTUREE,
+                    "Hyperhydratation IV. Antalgiques palier 3. Oxygénothérapie. Surveillance rénale."
+            ),
+            new SymptomeDiagnostic(
+                    "Otalgie droite. Hypoacousie. Otorrhée mucopurulente. Antécédent de rhinopharyngite récente.",
+                    "Otite moyenne aiguë suppurée droite", 0.93, StatutConsultation.CLOTUREE,
+                    "Antibiothérapie 8 jours. Paracétamol. Contrôle otoscopique dans 10 jours."
+            )
+    );
+
     private void creerConsultations(List<Patient> patients, List<User> users) {
         User agent = users.stream()
                 .filter(u -> u.getRole() == RoleUser.AGENT)
@@ -143,55 +251,73 @@ public class DataInitializer implements CommandLineRunner {
                 .filter(u -> u.getRole() == RoleUser.MEDECIN)
                 .findFirst().orElseThrow();
 
-        Patient premierPatient = patients.get(0);
-        Patient deuxiemePatient = patients.get(1);
+        List<Consultation> consultations = new ArrayList<>();
+        List<SymptomeDiagnostic> shuffled = new ArrayList<>(SCENARIOS);
+        Collections.shuffle(shuffled);
 
-        List<Consultation> consultations = List.of(
-                Consultation.builder()
-                        .date(LocalDateTime.now().minusDays(5))
-                        .symptomes("Fièvre 39 °C depuis 3 jours. Céphalées intenses. Courbatures généralisées.")
-                        .diagnosticIa("Paludisme simple - Plasmodium falciparum")
-                        .scoreConfiance(0.94)
-                        .statut(StatutConsultation.CLOTUREE)
-                        .notes("Patient vu en urgence. TDR positif. Traitement ACT prescrit. RDV de contrôle dans 1 semaine.")
-                        .patient(premierPatient)
-                        .user(medecin)
-                        .build(),
+        LocalDateTime now = LocalDateTime.now();
+        // 12 consultations par établissement, réparties sur 3 mois (90 jours)
+        for (int i = 0; i < 12; i++) {
+            SymptomeDiagnostic scenario = shuffled.get(i % shuffled.size());
 
-                Consultation.builder()
-                        .date(LocalDateTime.now().minusDays(2))
-                        .symptomes("Douleurs abdominales diffuses. Brûlures mictionnelles. Pollakiurie.")
-                        .diagnosticIa("Infection urinaire basse - Cystite aiguë")
-                        .scoreConfiance(0.87)
-                        .statut(StatutConsultation.ANALYSEE)
-                        .patient(deuxiemePatient)
-                        .user(medecin)
-                        .build(),
+            // Répartition uniforme sur les 90 derniers jours, avec quelques heures de variation
+            long joursAlea = Math.round((i / 11.0) * 90);
+            int heuresAlea = ThreadLocalRandom.current().nextInt(0, 23);
+            LocalDateTime dateConsultation = now
+                    .minusDays(joursAlea)
+                    .withHour(heuresAlea)
+                    .withMinute(ThreadLocalRandom.current().nextInt(0, 59));
 
-                Consultation.builder()
-                        .date(LocalDateTime.now().minusHours(6))
-                        .symptomes("Toux productive depuis 1 semaine. Douleur thoracique légère. Expectorations verdâtres.")
-                        .notes("Auscultation : râles bronchiques bilatéraux. Patient tabagique. À orienter vers radiographie.")
-                        .statut(StatutConsultation.EN_ATTENTE)
-                        .patient(premierPatient)
-                        .user(agent)
-                        .build(),
+            // Alternance patient et utilisateur pour diversifier
+            Patient patient = patients.get(i % patients.size());
+            User praticien = (i % 3 == 0) ? agent : medecin;
 
-                Consultation.builder()
-                        .date(LocalDateTime.now().minusDays(10))
-                        .symptomes("Céphalées chroniques. Vertiges occasionnels. Acouphènes.")
-                        .diagnosticIa("Hypertension artérielle essentielle stade 1")
-                        .scoreConfiance(0.91)
-                        .statut(StatutConsultation.CLOTUREE)
-                        .notes("TA 148/92 mmHg. Conseils hygiéno-diététiques. Suivi tensionnel à domicile. Contrôle dans 3 mois.")
-                        .patient(deuxiemePatient)
-                        .user(medecin)
-                        .build()
-        );
+            Consultation consultation = Consultation.builder()
+                    .date(dateConsultation)
+                    .symptomes(scenario.symptomes)
+                    .diagnosticIa(praticien == medecin && scenario.statut != StatutConsultation.EN_ATTENTE
+                            ? scenario.diagnosticIa : null)
+                    .scoreConfiance(praticien == medecin && scenario.statut != StatutConsultation.EN_ATTENTE
+                            ? scenario.scoreConfiance : null)
+                    .statut(scenario.statut)
+                    .notes(scenario.notes)
+                    .patient(patient)
+                    .user(praticien)
+                    .build();
+
+            consultations.add(consultation);
+        }
+
+        // Ajout de 3 consultations très récentes pour garantir des données dans "ce mois"
+        for (int i = 0; i < 3; i++) {
+            SymptomeDiagnostic scenario = shuffled.get((shuffled.size() - 1 - i) % shuffled.size());
+            Patient patient = patients.get(i % patients.size());
+
+            Consultation recente = Consultation.builder()
+                    .date(now.minusHours(ThreadLocalRandom.current().nextInt(1, 72)))
+                    .symptomes(scenario.symptomes)
+                    .diagnosticIa(scenario.diagnosticIa)
+                    .scoreConfiance(scenario.scoreConfiance)
+                    .statut(scenario.statut)
+                    .notes(scenario.notes)
+                    .patient(patient)
+                    .user(medecin)
+                    .build();
+            consultations.add(recente);
+        }
 
         consultationRepository.saveAll(consultations);
-        log.info("{} : {} consultations créées.", agent.getEtablissement().getNom(), consultations.size());
+        log.info("{} : {} consultations créées (réparties sur 3 mois).",
+                patients.get(0).getEtablissement().getNom(), consultations.size());
     }
+
+    private record SymptomeDiagnostic(
+            String symptomes,
+            String diagnosticIa,
+            double scoreConfiance,
+            StatutConsultation statut,
+            String notes
+    ) {}
 
     private String genererNumeroDossier() {
         return "SP-" + UUID.randomUUID().toString().substring(0, 8).toUpperCase();
