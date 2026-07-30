@@ -68,9 +68,7 @@ secrets/
 # ============================================
 # Spring Boot — Application Properties
 # ============================================
-application-local.properties
 application-dev.properties
-application-prod.properties
 application-test.properties
 !application.properties.example
 !application.yml.example
