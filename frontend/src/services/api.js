@@ -2,7 +2,8 @@ import axios from "axios";
 
 // Instance Axios partagée pour tout SénSanté Pro
 const api = axios.create({
-  baseURL: import.meta.env.VITE_API_URL || "http://localhost:8080",
+  // URL relative : en dev, Vite proxy vers localhost:8080 ; en prod, Nginx proxy vers backend
+  baseURL: import.meta.env.VITE_API_URL || "",
   headers: { "Content-Type": "application/json" },
   timeout: 15000,
 });
