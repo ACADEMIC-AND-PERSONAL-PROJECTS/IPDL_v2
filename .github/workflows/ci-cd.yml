@@ -27,28 +27,6 @@ jobs:
         name: Tests Backend
         runs-on: ubuntu-latest
 
-        services:
-            postgres:
-                image: postgres:15-alpine
-                env:
-                    POSTGRES_DB: demo_pro
-                    POSTGRES_USER: demo_user
-                    POSTGRES_PASSWORD: demo_pass
-                ports:
-                    - 5432:5432
-                options: >-
-                    --health-cmd "pg_isready -U demo_user -d demo_pro"
-                    --health-interval 10s
-                    --health-timeout 5s
-                    --health-retries 5
-        
-        env:
-            SPRING_DATASOURCE_URL: jdbc:postgresql://localhost:5432/demo_pro
-            SPRING_DATASOURCE_USERNAME: demo_user
-            SPRING_DATASOURCE_PASSWORD: demo_pass
-            JWT_SECRET: test-secret-key-min-256-bits-for-hmac-sha
-            ANTHROPIC_AUTH_TOKEN: dummy-key-for-tests
-        
         steps:
             - name: Checkout du code
               uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11
@@ -61,7 +39,7 @@ jobs:
                 cache: 'maven'
 
             - name: Tests
-              run: mvn test
+              run: mvn test --no-transfer-progress
 
             - name: Rapport de tests
               if: always()
