@@ -4,7 +4,6 @@ name: Pipeline CI/CD complete
 # Permissions
 permissions:
     contents: read
-    packages: write
     actions: read
     checks: write
     security-events: write
@@ -13,11 +12,6 @@ permissions:
 on:
     push:
         branches: [main]
-
-# Variables d'environnement
-env:
-    REGISTRY: ghcr.io
-    IMAGE_TAG: ${{ github.sha }}
 
 # Taches du workflow
 jobs:
@@ -50,82 +44,46 @@ jobs:
                 path: target/surefire-reports/*.xml
                 reporter: java-junit
 
-    #======================#
-    # TACHE : Build & Push #
-    #======================#
-    build:
-        name: Build & Push Docker image
+    #===========================#
+    # TACHE : Deploiement VPS   #
+    #===========================#
+    deploy-staging:
+        name: Deploiement sur le VPS
         runs-on: ubuntu-latest
         needs: test-backend
         steps:
-            - name: Checkout du code
-              uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11
-
-            - name: Normaliser le nom du depot en minuscule
-              id: normalize
-              run: echo "repo=${GITHUB_REPOSITORY,,}" >> $GITHUB_OUTPUT
-
-            - name: Login GHCR
-              uses: docker/login-action@dbcb813823bdd20940b903addbd779551569679f
-              with:
-                registry: ghcr.io
-                username: ${{ github.actor }}
-                password: ${{ secrets.GITHUB_TOKEN }}
-
-            - name: Setup Docker Buildx
-              uses: docker/setup-buildx-action@bb05f3f5519dd87d3ba754cc423b652a5edd6d2c
-
-            # BACKEND SPRING BOOT
-            - name: Build & Push Backend
-              uses: docker/build-push-action@10e90e3645eae34f1e60eeb005ba3a3d33f178e8
-              with:
-                context: .
-                file: Dockerfile
-                push: true
-                tags: |
-                    ghcr.io/${{ steps.normalize.outputs.repo }}/backend:${{ env.IMAGE_TAG }}
-                    ghcr.io/${{ steps.normalize.outputs.repo }}/backend:latest
-
-            # FRONTEND REACT
-            - name: Build & Push Frontend
-              uses: docker/build-push-action@10e90e3645eae34f1e60eeb005ba3a3d33f178e8
-              with:
-                context: ./frontend
-                file: ./frontend/Dockerfile
-                push: true
-                build-args: |
-                    VITE_API_URL=${{ secrets.VITE_API_URL }}
-                tags: |
-                    ghcr.io/${{ steps.normalize.outputs.repo }}/frontend:${{ env.IMAGE_TAG }}
-                    ghcr.io/${{ steps.normalize.outputs.repo }}/frontend:latest
-
-    deploy-staging:
-        name: Deployment into the staging environment
-        runs-on: ubuntu-latest
-        needs: build
-        steps:
-            # Docker exige des noms en minuscules (OCI spec)
-            - name: Normaliser le nom du depot en minuscule
-              id: normalize
-              run: echo "repo=${GITHUB_REPOSITORY,,}" >> $GITHUB_OUTPUT
-
-            - name: Executer les commandes via SSH
+            - name: Deployer via SSH
               uses: appleboy/ssh-action@0ff4204d59e8e51228ff73bce53f80d53301dee2
               with:
                 host: ${{ secrets.SSH_HOST }}
                 username: ${{ secrets.SSH_USER }}
                 key: ${{ secrets.SSH_KEY }}
                 script: |
+                    set -e
+
                     cd /srv/sensante-pro/IPDL_v2
+
+                    echo "=== Pull du code ==="
                     git pull origin main
 
+                    echo "=== Export des variables d'environnement ==="
                     export POSTGRES_DB=${{ secrets.POSTGRES_DB }}
                     export POSTGRES_USER=${{ secrets.POSTGRES_USER }}
                     export POSTGRES_PASSWORD=${{ secrets.POSTGRES_PASSWORD }}
                     export JWT_SECRET=${{ secrets.JWT_SECRET }}
                     export ANTHROPIC_AUTH_TOKEN=${{ secrets.ANTHROPIC_AUTH_TOKEN }}
-                    export GITHUB_REPOSITORY=${{ steps.normalize.outputs.repo }}
-                    export IMAGE_TAG=${{ github.sha }}
+                    export VITE_API_URL=${{ secrets.VITE_API_URL }}
 
-                    docker compose -f docker-compose.prod.yml pull
+                    echo "=== Build des images Docker ==="
+                    docker compose -f docker-compose.prod.yml build --no-cache
+
+                    echo "=== Arret des anciens conteneurs ==="
+                    docker compose -f docker-compose.prod.yml down
+
+                    echo "=== Suppression des anciennes images ==="
+                    docker image prune -f
+
+                    echo "=== Demarrage des nouveaux conteneurs ==="
                     docker compose -f docker-compose.prod.yml up -d
+
+                    echo "=== Deploiement termine ==="
