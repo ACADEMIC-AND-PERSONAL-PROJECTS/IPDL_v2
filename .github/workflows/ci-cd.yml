@@ -117,6 +117,7 @@ jobs:
                 key: ${{ secrets.SSH_KEY }}
                 script: |
                     cd /srv/sensante-pro/IPDL_v2
+                    git pull origin main
 
                     export POSTGRES_DB=${{ secrets.POSTGRES_DB }}
                     export POSTGRES_USER=${{ secrets.POSTGRES_USER }}
