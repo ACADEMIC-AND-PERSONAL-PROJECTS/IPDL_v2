@@ -66,13 +66,15 @@ jobs:
                     echo "=== Pull du code ==="
                     git pull origin main
 
-                    echo "=== Export des variables d'environnement ==="
-                    export POSTGRES_DB=${{ secrets.POSTGRES_DB }}
-                    export POSTGRES_USER=${{ secrets.POSTGRES_USER }}
-                    export POSTGRES_PASSWORD=${{ secrets.POSTGRES_PASSWORD }}
-                    export JWT_SECRET=${{ secrets.JWT_SECRET }}
-                    export ANTHROPIC_AUTH_TOKEN=${{ secrets.ANTHROPIC_AUTH_TOKEN }}
-                    export VITE_API_URL=${{ secrets.VITE_API_URL }}
+                    echo "=== Ecriture du fichier .env ==="
+                    cat > .env << 'ENVEOF'
+                    POSTGRES_DB=${{ secrets.POSTGRES_DB }}
+                    POSTGRES_USER=${{ secrets.POSTGRES_USER }}
+                    POSTGRES_PASSWORD=${{ secrets.POSTGRES_PASSWORD }}
+                    JWT_SECRET=${{ secrets.JWT_SECRET }}
+                    ANTHROPIC_AUTH_TOKEN=${{ secrets.ANTHROPIC_AUTH_TOKEN }}
+                    VITE_API_URL=${{ secrets.VITE_API_URL }}
+                    ENVEOF
 
                     echo "=== Build des images Docker ==="
                     docker compose -f docker-compose.prod.yml build --no-cache
