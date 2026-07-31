@@ -73,7 +73,7 @@ jobs:
                     POSTGRES_PASSWORD=${{ secrets.POSTGRES_PASSWORD }}
                     JWT_SECRET=${{ secrets.JWT_SECRET }}
                     ANTHROPIC_AUTH_TOKEN=${{ secrets.ANTHROPIC_AUTH_TOKEN }}
-                    VITE_API_URL=${{ secrets.VITE_API_URL }}
+                    VITE_API_URL=""
                     ENVEOF
 
                     echo "=== Build des images Docker ==="
