@@ -2,7 +2,7 @@
 
 output "postgres_container_id" {
   description = "ID du conteneur PostgreSQL"
-  value = docker_container.id
+  value = docker_container.postgres.id
 }
 
 output "backend_url" {
