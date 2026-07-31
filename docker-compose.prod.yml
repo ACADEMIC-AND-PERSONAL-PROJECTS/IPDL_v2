@@ -1,51 +1,70 @@
 # Environnement de production/staging
 
+networks:
+  sensante-network:
+    driver: bridge
+
+volumes:
+  postgres-data:
+  backend-logs:
+
 services:
+  # --- Base de donnees ---
   postgres:
     image: postgres:15-alpine
+    container_name: sensante-postgres
     environment:
       POSTGRES_DB:       ${POSTGRES_DB}
       POSTGRES_USER:     ${POSTGRES_USER}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
     volumes:
-      - postgres_prod:/var/lib/postgresql/data
+      - postgres-data:/var/lib/postgresql/data
+      - ./init.sql:/docker-entrypoint-initdb.d/01-init.sql
+    networks:
+      - sensante-network
     restart: unless-stopped
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
       interval: 10s
       retries: 5
 
+  # --- Backend Spring Boot ---
   backend:
     build:
       context: .
       dockerfile: Dockerfile
-    image: ipdl-backend:latest
+    container_name: sensante-backend
     environment:
-      SPRING_DATASOURCE_URL:      jdbc:postgresql://postgres:5432/${POSTGRES_DB}
-      SPRING_DATASOURCE_USERNAME: ${POSTGRES_USER}
-      SPRING_DATASOURCE_PASSWORD: ${POSTGRES_PASSWORD}
-      JWT_SECRET:                 ${JWT_SECRET}
-      ANTHROPIC_AUTH_TOKEN:       ${ANTHROPIC_AUTH_TOKEN}
-      SPRING_PROFILES_ACTIVE:     prod
+      SPRING_DATASOURCE_URL:         jdbc:postgresql://postgres:5432/${POSTGRES_DB}
+      SPRING_DATASOURCE_USERNAME:    ${POSTGRES_USER}
+      SPRING_DATASOURCE_PASSWORD:    ${POSTGRES_PASSWORD}
+      SPRING_JPA_HIBERNATE_DDL_AUTO: validate
+      JWT_SECRET:                    ${JWT_SECRET}
+      ANTHROPIC_AUTH_TOKEN:          ${ANTHROPIC_AUTH_TOKEN}
+      SPRING_PROFILES_ACTIVE:        prod
+    volumes:
+      - backend-logs:/app/logs
     ports: 
       - "8080:8080"
+    networks:
+      - sensante-network
     depends_on:
       postgres:
         condition: service_healthy
     restart: unless-stopped
 
+  # --- Frontend React/Nginx ---
   frontend:
     build:
       context: ./frontend
       dockerfile: Dockerfile
       args:
         VITE_API_URL: ${VITE_API_URL}
-    image: ipdl-frontend:latest
+    container_name: sensante-frontend
     ports:
       - "8088:80"
+    networks:
+      - sensante-network
     depends_on:
       - backend
     restart: unless-stopped
-
-volumes:
-  postgres_prod:

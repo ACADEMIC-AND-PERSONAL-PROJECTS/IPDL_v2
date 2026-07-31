@@ -1,0 +1,8 @@
+# docker ignore for the backend
+target/
+.mvn/
+*.md
+.git
+.gitignore
+Dockerfile
+docs/
