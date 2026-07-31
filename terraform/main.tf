@@ -99,7 +99,7 @@ resource "docker_container" "backend" {
   }
 
   ports {
-    internal = 5432
+    internal = 8080
     external = var.backend_port
   }
 
