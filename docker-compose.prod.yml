@@ -19,6 +19,7 @@ services:
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
     volumes:
       - postgres-data:/var/lib/postgresql/data
+      - ./init.sql:/docker-entrypoint-initdb.d/01-init.sql
     networks:
       - sensante-network
     restart: unless-stopped
@@ -37,7 +38,7 @@ services:
       SPRING_DATASOURCE_URL:         jdbc:postgresql://postgres:5432/${POSTGRES_DB}
       SPRING_DATASOURCE_USERNAME:    ${POSTGRES_USER}
       SPRING_DATASOURCE_PASSWORD:    ${POSTGRES_PASSWORD}
-      SPRING_JPA_HIBERNATE_DDL_AUTO: update
+      SPRING_JPA_HIBERNATE_DDL_AUTO: validate
       JWT_SECRET:                    ${JWT_SECRET}
       ANTHROPIC_AUTH_TOKEN:          ${ANTHROPIC_AUTH_TOKEN}
       SPRING_PROFILES_ACTIVE:        prod
