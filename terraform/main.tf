@@ -29,7 +29,7 @@ resource "docker_image" "postgres" {
 
 # === Conteneur PostgreSQL ===
 resource "docker_container" "postgres" {
-  name  = "sensante-tf-postgres"
+  name  = "postgres"
   image = docker_image.postgres.image_id
 
   env = [
@@ -82,11 +82,11 @@ resource "docker_image" "backend" {
 
 # === Conteneur Backend ===
 resource "docker_container" "backend" {
-  name  = "sensante-tf-backend"
+  name  = "backend"
   image = docker_image.backend.image_id
 
   env = [
-    "SPRING_DATASOURCE_URL=jdbc:postgresql://sensante-tf-postgres:5432/${var.postgres_db}",
+    "SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/${var.postgres_db}",
     "SPRING_DATASOURCE_USERNAME=${var.postgres_user}",
     "SPRING_DATASOURCE_PASSWORD=${var.postgres_password}",
     "JWT_SECRET=${var.jwt_secret}",
@@ -105,5 +105,38 @@ resource "docker_container" "backend" {
 
   depends_on = [docker_container.postgres]
   restart = "unless-stopped"
+}
 
+# === Image Frontend ===
+resource "docker_image" "frontend" {
+  name = "sensante-frontend-tf:latest"
+  build {
+    context    = "${path.module}/../frontend/"
+    dockerfile = "Dockerfile"
+  }
+
+  triggers = {
+    dir_sha1 = sha1(join("", [
+      for f in fileset("${path.module}/../frontend/src", "**")
+      : filesha1("${path.module}/../frontend/src/${f}")
+    ]))
+  }
+}
+
+# === Conteneur Frontend ===
+resource "docker_container" "frontend" {
+  name  = "frontend"
+  image = docker_image.frontend.image_id
+
+  networks_advanced {
+    name = docker_network.sensante_network.name
+  }
+
+  ports {
+    internal = 80
+    external = var.frontend_port
+  }
+
+  depends_on = [docker_container.backend]
+  restart    = "unless-stopped"
 }

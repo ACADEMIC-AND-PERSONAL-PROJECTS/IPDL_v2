@@ -41,3 +41,9 @@ variable "anthropic_auth_token" {
   type = string
   sensitive = true
 }
+
+variable "frontend_port" {
+  description = "Port d'ecoute du frontend expose sur l'hote"
+  type = number
+  default = 8088
+}
