@@ -1,2 +1,6 @@
+# Docker ignore for frontend
 node_modules/
 dist/
+.env*
+.*md
+.git
