@@ -131,3 +131,4 @@ frontend/.env.local
 
 # application.properties for local dev
 src/main/resources/application.properties
+./terraform/terraform.tfvars
