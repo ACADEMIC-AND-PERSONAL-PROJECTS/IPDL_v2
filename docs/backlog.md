@@ -11,4 +11,4 @@ Ce backlog regroupe les 8 User Stories du projet SenSante Pro, d'apres le plan d
 | US-05 | En tant qu'agent de sante, je veux naviguer dans une interface web afin d'acceder rapidement aux donnees. | 2 | Done   |
 | US-06 | En tant qu'administrateur, je veux consulter les statistiques afin de suivre l'activite. | 3 | Done   |
 | US-07 | En tant que DevOps, je veux un pipeline CI/CD automatise afin de garantir la qualite a chaque commit. | 3 | Done   |
-| US-08 | En tant qu'administrateur, je veux consulter les logs d'audit afin de tracer les actions sensibles. | 4 | To Do  |
+| US-08 | En tant qu'administrateur, je veux consulter les logs d'audit afin de tracer les actions sensibles. | 4 | Done   |
