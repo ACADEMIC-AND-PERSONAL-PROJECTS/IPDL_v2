@@ -1,28 +1,24 @@
-# === Stage 1 : Build ===
 FROM maven:3.9-eclipse-temurin-21 AS builder
 WORKDIR /app
 
-# Copie du pom.xml sur le conteneur et telechargement des dependances
+# --- Layer 1 : Dependancies ---
 COPY pom.xml .
 RUN mvn dependency:go-offline -q
 
-# Copie du code source
+# --- Layer 2 : source code ---
 COPY src ./src
 RUN mvn clean package -DskipTests -q
 
-# === Stage 2 : Image finale ===
+# --- Final docker image ---
 FROM eclipse-temurin:21-jre-alpine AS runtime
-WORKDIR /app
-
-# Creation d'un utilisateur
 RUN addgroup -S sensante && adduser -S sensante -G sensante
-USER sensante
 
-# Copie du jar
+WORKDIR /app
 COPY --from=builder /app/target/demo-*.jar app.jar
+RUN chown sensante:sensante app.jar
 
-# Expose le port 8080 du conteneur
+USER sensante
 EXPOSE 8080
+HEALTHCHECK --interval=30s --timeout=5s --retries=3 CMD wget --no-verbose --tries=1 --spider http://localhost:8080/actuator/health || exit 1
 
-# Commande principale que le conteneur lance
-ENTRYPOINT [ "java", "-Djava.security.edge=file:/dev/./urandom", "-jar", "app.jar" ]
+ENTRYPOINT [ "java", "-Djava.security.edg=file:/dev/./urandom", "-Xmx512m", "-jar", "app.jar" ]
