@@ -48,6 +48,118 @@ graph LR
     D -->|Tableau de bord| F[ Analytics]
 ```
 
+```mermaid
+flowchart TD
+
+subgraph group_experience["Web Experience"]
+  node_react_app["React Application<br/>[App.jsx]"]
+  node_dashboard_page["Dashboard Page<br/>[DashboardPage.jsx]"]
+end
+
+subgraph group_access["Identity Access"]
+  node_auth_context["Auth Context<br/>[AuthContext.jsx]"]
+  node_auth_service["Auth API Client<br/>[authService.js]"]
+  node_auth_controller["Auth Controller"]
+  node_auth_service_backend["Auth Service<br/>[AuthService.java]"]
+  node_jwt_service["JWT Service<br/>[JwtService.java]"]
+  node_security_filter["JWT Security Filter<br/>[JwtAuthFilter.java]"]
+end
+
+subgraph group_care["Patient Care"]
+  node_patient_pages["Patient Pages<br/>[PatientsPage.jsx]"]
+  node_patient_client["Patient API Client<br/>[patientsService.js]"]
+  node_patient_controller["Patient Controllers"]
+  node_establishment_controller["Establishment Controller"]
+  node_patient_service["Patient Service"]
+  node_consultation_pages["Consultation Pages"]
+  node_consultation_client["Consultation API Client"]
+  node_consultation_controller["Consultation Controller"]
+  node_consultation_service["Consultation Service"]
+end
+
+subgraph group_intelligence["Clinical Intelligence"]
+  node_ai_service["AI Service<br/>[AiService.java]"]
+end
+
+subgraph group_insights["Analytics Data"]
+  node_patient_store[("Patient Database")]
+  node_consultation_store[("Consultation Database")]
+  node_analytics_client["Analytics API Client"]
+  node_analytics_controller["Analytics Controller"]
+  node_analytics_service["Analytics Service"]
+end
+
+node_professional(("Healthcare Professional"))
+node_deepseek{{"DeepSeek API"}}
+node_postgresql[("PostgreSQL")]
+
+node_professional -->|"uses"| node_react_app
+node_react_app -->|"provides auth"| node_auth_context
+node_auth_context -->|"logs in"| node_auth_service
+node_auth_service -->|"sends credentials"| node_auth_controller
+node_auth_controller -->|"authenticates"| node_auth_service_backend
+node_auth_service_backend -->|"creates JWT"| node_jwt_service
+node_auth_service_backend -->|"reads users"| node_postgresql
+node_security_filter -->|"validates JWT"| node_jwt_service
+node_react_app -->|"routes patients"| node_patient_pages
+node_patient_pages -->|"requests patients"| node_patient_client
+node_patient_pages -->|"loads establishments"| node_establishment_controller
+node_patient_client -->|"manages patients"| node_patient_controller
+node_patient_controller -->|"delegates care"| node_patient_service
+node_patient_service -->|"reads writes"| node_patient_store
+node_patient_store -->|"persists patients"| node_postgresql
+node_react_app -->|"routes consultations"| node_consultation_pages
+node_consultation_pages -->|"submits consultations"| node_consultation_client
+node_consultation_client -->|"manages consultations"| node_consultation_controller
+node_consultation_controller -->|"delegates workflow"| node_consultation_service
+node_consultation_service -->|"reads writes"| node_consultation_store
+node_consultation_store -->|"persists consultations"| node_postgresql
+node_consultation_service -->|"requests diagnosis"| node_ai_service
+node_ai_service -.->|"analyzes symptoms"| node_deepseek
+node_react_app -->|"routes dashboard"| node_dashboard_page
+node_dashboard_page -->|"loads summary"| node_analytics_client
+node_analytics_client -->|"requests metrics"| node_analytics_controller
+node_analytics_controller -->|"builds summary"| node_analytics_service
+node_analytics_service -->|"reads aggregates"| node_postgresql
+
+click node_react_app "https://github.com/academic-and-personal-projects/ipdl_v2/blob/main/frontend/src/App.jsx"
+click node_auth_context "https://github.com/academic-and-personal-projects/ipdl_v2/blob/main/frontend/src/contexts/AuthContext.jsx"
+click node_auth_service "https://github.com/academic-and-personal-projects/ipdl_v2/blob/main/frontend/src/services/authService.js"
+click node_auth_controller "https://github.com/academic-and-personal-projects/ipdl_v2/blob/main/src/main/java/com/example/demo/auth/controller/AuthController.java"
+click node_auth_service_backend "https://github.com/academic-and-personal-projects/ipdl_v2/blob/main/src/main/java/com/example/demo/auth/service/AuthService.java"
+click node_jwt_service "https://github.com/academic-and-personal-projects/ipdl_v2/blob/main/src/main/java/com/example/demo/auth/service/JwtService.java"
+click node_security_filter "https://github.com/academic-and-personal-projects/ipdl_v2/blob/main/src/main/java/com/example/demo/auth/JwtAuthFilter.java"
+click node_patient_pages "https://github.com/academic-and-personal-projects/ipdl_v2/blob/main/frontend/src/pages/PatientsPage.jsx"
+click node_patient_client "https://github.com/academic-and-personal-projects/ipdl_v2/blob/main/frontend/src/services/patientsService.js"
+click node_patient_controller "https://github.com/academic-and-personal-projects/ipdl_v2/blob/main/src/main/java/com/example/demo/patient/controller/PatientController.java"
+click node_establishment_controller "https://github.com/academic-and-personal-projects/ipdl_v2/blob/main/src/main/java/com/example/demo/patient/controller/EtablissementController.java"
+click node_patient_service "https://github.com/academic-and-personal-projects/ipdl_v2/blob/main/src/main/java/com/example/demo/patient/service/PatientService.java"
+click node_patient_store "https://github.com/academic-and-personal-projects/ipdl_v2/blob/main/src/main/java/com/example/demo/patient/repository/PatientRepository.java"
+click node_consultation_pages "https://github.com/academic-and-personal-projects/ipdl_v2/blob/main/frontend/src/pages/ConsultationsPage.jsx"
+click node_consultation_client "https://github.com/academic-and-personal-projects/ipdl_v2/blob/main/frontend/src/services/consultationsService.js"
+click node_consultation_controller "https://github.com/academic-and-personal-projects/ipdl_v2/blob/main/src/main/java/com/example/demo/consultation/controller/ConsultationController.java"
+click node_consultation_service "https://github.com/academic-and-personal-projects/ipdl_v2/blob/main/src/main/java/com/example/demo/consultation/service/ConsultationService.java"
+click node_consultation_store "https://github.com/academic-and-personal-projects/ipdl_v2/blob/main/src/main/java/com/example/demo/consultation/repository/ConsultationRepository.java"
+click node_ai_service "https://github.com/academic-and-personal-projects/ipdl_v2/blob/main/src/main/java/com/example/demo/ia/service/AiService.java"
+click node_dashboard_page "https://github.com/academic-and-personal-projects/ipdl_v2/blob/main/frontend/src/pages/DashboardPage.jsx"
+click node_analytics_client "https://github.com/academic-and-personal-projects/ipdl_v2/blob/main/frontend/src/services/analyticsService.js"
+click node_analytics_controller "https://github.com/academic-and-personal-projects/ipdl_v2/blob/main/src/main/java/com/example/demo/analytics/controller/AnalyticsController.java"
+click node_analytics_service "https://github.com/academic-and-personal-projects/ipdl_v2/blob/main/src/main/java/com/example/demo/analytics/service/AnalyticsService.java"
+
+classDef toneNeutral fill:#f8fafc,stroke:#334155,stroke-width:1.5px,color:#0f172a
+classDef toneBlue fill:#dbeafe,stroke:#2563eb,stroke-width:1.5px,color:#172554
+classDef toneAmber fill:#fef3c7,stroke:#d97706,stroke-width:1.5px,color:#78350f
+classDef toneMint fill:#dcfce7,stroke:#16a34a,stroke-width:1.5px,color:#14532d
+classDef toneRose fill:#ffe4e6,stroke:#e11d48,stroke-width:1.5px,color:#881337
+classDef toneIndigo fill:#e0e7ff,stroke:#4f46e5,stroke-width:1.5px,color:#312e81
+classDef toneTeal fill:#ccfbf1,stroke:#0f766e,stroke-width:1.5px,color:#134e4a
+class node_react_app,node_dashboard_page toneBlue
+class node_auth_context,node_auth_service,node_auth_controller,node_auth_service_backend,node_jwt_service,node_security_filter,node_postgresql toneAmber
+class node_patient_pages,node_patient_client,node_patient_controller,node_establishment_controller,node_patient_service,node_consultation_pages,node_consultation_client,node_consultation_controller,node_consultation_service,node_deepseek toneMint
+class node_ai_service toneRose
+class node_patient_store,node_consultation_store,node_analytics_client,node_analytics_controller,node_analytics_service,node_professional toneIndigo
+```
+
 ## Stack technique
 
 | Couche | Technologie |
